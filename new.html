@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Surprise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-deep: #05080f;
+            --bg-mid: #0a1025;
+            --bg-upper: #0f1633;
+            --moon-core: #fffce8;
+            --moon-light: #f7ecc6;
+            --moon-mid: #e8d9a8;
+            --moon-dark: #c4b078;
+            --moon-glow: #ffe4a0;
+            --accent-gold: #e8c547;
+            --accent-warm: #d4a853;
+            --card-bg: rgba(12, 18, 38, 0.92);
+            --border: rgba(232, 197, 71, 0.12);
+            --safe-area-top: env(safe-area-inset-top, 0px);
+            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-deep);
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            color: #e8e8e8;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .night-sky {
+            position: fixed;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse at 80% 10%, rgba(30, 40, 80, 0.3) 0%, transparent 50%),
+                radial-gradient(ellipse at 20% 80%, rgba(20, 30, 60, 0.2) 0%, transparent 40%),
+                radial-gradient(ellipse at 50% 50%, rgba(15, 22, 51, 0.8) 0%, transparent 70%),
+                linear-gradient(180deg, 
+                    #020408 0%,
+                    #050a14 10%,
+                    #0a1025 30%,
+                    #0d1530 50%,
+                    #0a0f20 70%,
+                    #050810 100%
+                );
+            z-index: -10;
+        }
+
+        .milky-way {
+            position: fixed;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse 120% 40% at 30% 30%, rgba(100, 120, 180, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse 100% 30% at 70% 60%, rgba(80, 100, 150, 0.02) 0%, transparent 40%);
+            z-index: -9;
+            animation: milkyDrift 120s linear infinite;
+        }
+
+        @keyframes milkyDrift {
+            0% { transform: translateX(0) translateY(0); }
+            50% { transform: translateX(-5%) translateY(2%); }
+            100% { transform: translateX(0) translateY(0); }
+        }
+
+        #starsCanvas, #shootingCanvas, #shimmerCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #starsCanvas { z-index: -8; }
+        #shootingCanvas { z-index: -7; pointer-events: none; }
+        #shimmerCanvas { z-index: -6; pointer-events: none; }
+
+        .moon-container {
+            position: fixed;
+            z-index: -5;
+            filter: drop-shadow(0 0 40px rgba(255, 228, 160, 0.4));
+        }
+
+        .moon {
+            border-radius: 50%;
+            position: relative;
+            background: radial-gradient(circle at 38% 38%, 
+                var(--moon-core) 0%,
+                var(--moon-light) 25%,
+                var(--moon-mid) 55%,
+                var(--moon-dark) 85%,
+                #a89060 100%
+            );
+            box-shadow: 
+                0 0 80px 30px rgba(255, 228, 160, 0.25),
+                0 0 160px 60px rgba(255, 228, 160, 0.12),
+                0 0 240px 100px rgba(255, 228, 160, 0.06),
+                inset -25px -20px 50px rgba(100, 80, 40, 0.5),
+                inset 10px 10px 30px rgba(255, 255, 240, 0.2);
+            animation: moonGlow 6s ease-in-out infinite, moonFloat 20s ease-in-out infinite;
+        }
+
+        .moon::before, .moon::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 40%, 
+                rgba(160, 140, 100, 0.4) 0%,
+                rgba(140, 120, 80, 0.3) 50%,
+                transparent 70%
+            );
+            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .moon::before {
+            width: 25%; height: 25%;
+            top: 20%; left: 25%;
+            box-shadow: 
+                inset 2px 2px 5px rgba(0, 0, 0, 0.3),
+                90px 30px 0 15px rgba(160, 140, 100, 0.25),
+                40px 70px 0 8px rgba(160, 140, 100, 0.2),
+                100px 85px 0 20px rgba(160, 140, 100, 0.18),
+                -10px 90px 0 12px rgba(160, 140, 100, 0.22),
+                70px 110px 0 6px rgba(160, 140, 100, 0.15),
+                130px 50px 0 10px rgba(160, 140, 100, 0.2);
+        }
+
+        .moon::after {
+            width: 15%; height: 15%;
+            top: 55%; left: 15%;
+            box-shadow: 
+                inset 1px 1px 3px rgba(0, 0, 0, 0.25),
+                120px -20px 0 8px rgba(160, 140, 100, 0.2),
+                60px 20px 0 5px rgba(160, 140, 100, 0.18);
+        }
+
+        .moon-craters {
+            position: absolute; inset: 0;
+            border-radius: 50%; overflow: hidden;
+        }
+        .moon-craters::before {
+            content: ''; position: absolute; width: 100%; height: 100%;
+            background: 
+                radial-gradient(circle at 65% 35%, rgba(120, 100, 60, 0.15) 0%, transparent 8%),
+                radial-gradient(circle at 45% 65%, rgba(130, 110, 70, 0.12) 0%, transparent 6%),
+                radial-gradient(circle at 75% 55%, rgba(125, 105, 65, 0.1) 0%, transparent 5%),
+                radial-gradient(circle at 30% 40%, rgba(135, 115, 75, 0.08) 0%, transparent 4%),
+                radial-gradient(circle at 55% 25%, rgba(140, 120, 80, 0.1) 0%, transparent 3%);
+        }
+
+        @keyframes moonGlow {
+            0%, 100% { box-shadow: 0 0 80px 30px rgba(255, 228, 160, 0.25), 0 0 160px 60px rgba(255, 228, 160, 0.12), 0 0 240px 100px rgba(255, 228, 160, 0.06), inset -25px -20px 50px rgba(100, 80, 40, 0.5), inset 10px 10px 30px rgba(255, 255, 240, 0.2); }
+            50% { box-shadow: 0 0 100px 40px rgba(255, 228, 160, 0.35), 0 0 180px 80px rgba(255, 228, 160, 0.18), 0 0 280px 120px rgba(255, 228, 160, 0.08), inset -25px -20px 50px rgba(100, 80, 40, 0.5), inset 10px 10px 30px rgba(255, 255, 240, 0.2); }
+        }
+        @keyframes moonFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(1deg); }
+        }
+
+        .clouds-container {
+            position: fixed; inset: 0; z-index: -4; overflow: hidden;
+            perspective: 1500px; transform-style: preserve-3d;
+        }
+        .cloud-layer { position: absolute; inset: 0; transform-style: preserve-3d; }
+        .cloud {
+            position: absolute; filter: blur(2px); opacity: 0;
+            animation: cloudFadeIn 2s ease-out forwards;
+        }
+        @keyframes cloudFadeIn { to { opacity: 1; } }
+        .cloud-puff {
+            position: absolute;
+            background: radial-gradient(ellipse at center, rgba(180, 190, 210, 0.5) 0%, rgba(140, 150, 170, 0.25) 40%, transparent 70%);
+            border-radius: 50%;
+        }
+        .cloud-shadow {
+            position: absolute;
+            background: radial-gradient(ellipse at center, rgba(5, 8, 20, 0.3) 0%, transparent 60%);
+            border-radius: 50%; filter: blur(8px);
+        }
+        .cloud-1 { animation: cloudMove1 45s linear infinite; }
+        .cloud-2 { animation: cloudMove2 55s linear infinite; }
+        .cloud-3 { animation: cloudMove3 65s linear infinite; }
+        .cloud-4 { animation: cloudMove4 50s linear infinite; }
+        .cloud-5 { animation: cloudMove5 70s linear infinite; }
+        .cloud-6 { animation: cloudMove6 60s linear infinite; }
+        .cloud-7 { animation: cloudMove1 80s linear infinite; }
+        .cloud-8 { animation: cloudMove2 75s linear infinite; }
+
+        @keyframes cloudMove1 { 0% { transform: translateX(-200px) translateZ(20px) scale(1.6); } 100% { transform: translateX(calc(100vw + 250px)) translateZ(20px) scale(1.6); } }
+        @keyframes cloudMove2 { 0% { transform: translateX(calc(100vw + 150px)) translateZ(60px) scale(1.4); } 100% { transform: translateX(-200px) translateZ(60px) scale(1.4); } }
+        @keyframes cloudMove3 { 0% { transform: translateX(-250px) translateZ(100px) scale(1.2); } 100% { transform: translateX(calc(100vw + 300px)) translateZ(100px) scale(1.2); } }
+        @keyframes cloudMove4 { 0% { transform: translateX(calc(100vw + 200px)) translateZ(40px) scale(1.8); } 100% { transform: translateX(-250px) translateZ(40px) scale(1.8); } }
+        @keyframes cloudMove5 { 0% { transform: translateX(-180px) translateZ(80px) scale(1.3); } 100% { transform: translateX(calc(100vw + 220px)) translateZ(80px) scale(1.3); } }
+        @keyframes cloudMove6 { 0% { transform: translateX(calc(100vw + 180px)) translateZ(30px) scale(1.5); } 100% { transform: translateX(-220px) translateZ(30px) scale(1.5); } }
+
+        .main-container {
+            min-height: 100vh; min-height: 100dvh;
+            display: flex; align-items: center; justify-content: center;
+            padding: 16px;
+            padding-top: max(20px, var(--safe-area-top));
+            padding-bottom: max(20px, var(--safe-area-bottom));
+            position: relative; z-index: 1;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--border);
+            border-radius: clamp(18px, 5vw, 28px);
+            padding: clamp(22px, 5vw, 44px);
+            max-width: 480px; width: 100%;
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6), 0 0 100px 30px rgba(232, 197, 71, 0.03), 0 0 1px rgba(255, 255, 255, 0.1) inset;
+            animation: cardFloat 7s ease-in-out infinite;
+            position: relative; overflow: hidden;
+        }
+        .card::before {
+            content: ''; position: absolute; top: -100%; left: -100%; width: 300%; height: 300%;
+            background: radial-gradient(circle at 20% 20%, rgba(232, 197, 71, 0.04) 0%, transparent 30%), radial-gradient(circle at 80% 80%, rgba(212, 168, 83, 0.03) 0%, transparent 25%);
+            pointer-events: none; animation: cardShine 15s linear infinite;
+        }
+        @keyframes cardShine { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-6px) rotate(0.3deg); }
+            75% { transform: translateY(-10px) rotate(-0.3deg); }
+        }
+
+        .card-content { text-align: center; position: relative; z-index: 1; }
+        
+        .card-icon {
+            width: clamp(60px, 15vw, 80px); height: clamp(60px, 15vw, 80px);
+            margin: 0 auto clamp(20px, 5vw, 30px);
+            background: linear-gradient(145deg, rgba(232, 197, 71, 0.15) 0%, rgba(212, 168, 83, 0.08) 100%);
+            border-radius: 50%; border: 1px solid rgba(232, 197, 71, 0.2);
+            display: flex; align-items: center; justify-content: center;
+            animation: iconPulse 3s ease-in-out infinite;
+        }
+        .card-icon svg {
+            width: clamp(30px, 8vw, 40px); height: clamp(30px, 8vw, 40px);
+            color: var(--accent-gold);
+        }
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(232, 197, 71, 0.2); }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px 5px rgba(232, 197, 71, 0.1); }
+        }
+
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.5rem, 6vw, 2.2rem);
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-warm) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            margin-bottom: clamp(14px, 3vw, 20px);
+            line-height: 1.3;
+        }
+
+        .card-message {
+            font-size: clamp(1rem, 3.5vw, 1.15rem);
+            color: #c8cfd8;
+            line-height: 1.6;
+            margin-bottom: clamp(10px, 2.5vw, 16px);
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(232, 197, 71, 0.25) 20%, rgba(232, 197, 71, 0.4) 50%, rgba(232, 197, 71, 0.25) 80%, transparent 100%);
+            margin: clamp(20px, 4.5vw, 32px) 0;
+        }
+
+        .buttons-container {
+            display: flex; gap: clamp(12px, 3vw, 18px);
+            margin-top: clamp(8px, 2vw, 12px);
+        }
+
+        .btn {
+            flex: 1;
+            padding: clamp(14px, 3.5vw, 18px) clamp(20px, 4vw, 28px);
+            border-radius: clamp(11px, 3vw, 14px);
+            font-size: clamp(0.95rem, 3.2vw, 1.05rem);
+            font-weight: 600;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative; overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        .btn-yes {
+            background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-warm) 50%, #c49a3d 100%);
+            border: none;
+            color: #0a0e18;
+            box-shadow: 0 8px 25px rgba(232, 197, 71, 0.25);
+        }
+        .btn-yes::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.35) 50%, transparent 100%);
+            transition: left 0.6s ease;
+        }
+        .btn-yes:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(232, 197, 71, 0.35), 0 5px 15px rgba(232, 197, 71, 0.2);
+        }
+        .btn-yes:hover::before { left: 100%; }
+        .btn-yes:active { transform: translateY(-1px) scale(0.98); }
+
+        /* Responsive Adjustments */
+        @media (max-width: 360px) {
+            .main-container { padding: 12px; }
+            .card { padding: 18px; }
+            .moon-container { top: 2%; right: 2%; }
+            .moon { width: 55px; height: 55px; }
+        }
+        @media (min-width: 361px) and (max-width: 390px) {
+            .moon-container { top: 3%; right: 3%; }
+            .moon { width: 65px; height: 65px; }
+        }
+        @media (min-width: 391px) and (max-width: 430px) {
+            .moon-container { top: 4%; right: 4%; }
+            .moon { width: 75px; height: 75px; }
+        }
+        @media (min-width: 431px) and (max-width: 500px) {
+            .moon-container { top: 5%; right: 5%; }
+            .moon { width: 85px; height: 85px; }
+        }
+        @media (min-width: 501px) and (max-width: 768px) {
+            .moon-container { top: 6%; right: 6%; }
+            .moon { width: 95px; height: 95px; }
+        }
+        @media (min-width: 769px) {
+            .moon-container { top: 8%; right: 8%; }
+            .moon { width: 110px; height: 110px; }
+        }
+        @media (min-width: 1024px) {
+            .moon { width: 130px; height: 130px; }
+        }
+        @media (max-height: 500px) and (orientation: landscape) {
+            .main-container { padding: 10px; align-items: flex-start; padding-top: 10px; }
+            .card { padding: 16px 20px; animation: cardFloatLandscape 5s ease-in-out infinite; }
+            @keyframes cardFloatLandscape { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+            .moon-container { top: 4%; }
+            .moon { width: 50px; height: 50px; }
+            .card-icon { width: 50px; height: 50px; margin-bottom: 12px; }
+            .card-icon svg { width: 24px; height: 24px; }
+        }
+        @supports (padding-top: env(safe-area-inset-top)) {
+            .main-container {
+                padding-top: max(16px, env(safe-area-inset-top));
+                padding-bottom: max(16px, env(safe-area-inset-bottom));
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        .btn:focus-visible {
+            outline: 2px solid var(--accent-gold);
+            outline-offset: 3px;
+        }
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .card { border: 0.5px solid var(--border); }
+        }
+    </style>
+</head>
+<body>
+    <div class="night-sky"></div>
+    <div class="milky-way"></div>
+    <canvas id="starsCanvas"></canvas>
+    <canvas id="shootingCanvas"></canvas>
+    <canvas id="shimmerCanvas"></canvas>
+    
+    <div class="moon-container">
+        <div class="moon"><div class="moon-craters"></div></div>
+    </div>
+    
+    <div class="clouds-container">
+        <div class="cloud-layer">
+            <div class="cloud cloud-1" style="top: 8%; opacity: 0.12;">
+                <div class="cloud-shadow" style="width: 180px; height: 50px; left: 10px; top: 35px;"></div>
+                <div class="cloud-puff" style="width: 140px; height: 70px; left: 0; top: 10px;"></div>
+                <div class="cloud-puff" style="width: 100px; height: 90px; left: 50px; top: 0;"></div>
+                <div class="cloud-puff" style="width: 120px; height: 60px; left: 120px; top: 20px;"></div>
+                <div class="cloud-puff" style="width: 80px; height: 70px; left: 180px; top: 5px;"></div>
+            </div>
+            <div class="cloud cloud-2" style="top: 22%; opacity: 0.1;">
+                <div class="cloud-shadow" style="width: 160px; height: 45px; left: 8px; top: 32px;"></div>
+                <div class="cloud-puff" style="width: 120px; height: 60px; left: 0; top: 8px;"></div>
+                <div class="cloud-puff" style="width: 85px; height: 75px; left: 40px; top: 0;"></div>
+                <div class="cloud-puff" style="width: 110px; height: 55px; left: 100px; top: 15px;"></div>
+            </div>
+            <div class="cloud cloud-3" style="top: 38%; opacity: 0.14;">
+                <div class="cloud-shadow" style="width: 220px; height: 60px; left: 12px; top: 42px;"></div>
+                <div class="cloud-puff" style="width: 170px; height: 85px; left: 0; top: 5px;"></div>
+                <div class="cloud-puff" style="width: 120px; height: 110px; left: 60px; top: 0;"></div>
+                <div class="cloud-puff" style="width: 140px; height: 70px; left: 160px; top: 15px;"></div>
+                <div class="cloud-puff" style="width: 90px; height: 80px; left: 250px; top: 8px;"></div>
+            </div>
+            <div class="cloud cloud-4" style="top: 55%; opacity: 0.11;">
+                <div class="cloud-shadow" style="width: 200px; height: 55px; left: 10px; top: 38px;"></div>
+                <div class="cloud-puff" style="width: 150px; height: 75px; left: 0; top: 12px;"></div>
+                <div class="cloud-puff" style="width: 110px; height: 95px; left: 70px; top: 0;"></div>
+                <div class="cloud-puff" style="width: 130px; height: 65px; left: 150px; top: 18px;"></div>
+            </div>
+            <div class="cloud cloud-5" style="top: 70%; opacity: 0.13;">
+                <div class="cloud-shadow" style="width: 240px; height: 65px; left: 14px; top: 45px;"></div>
+                <div class="cloud-puff" style="width: 180px; height: 90px; left: 0; top: 8px;"></div>
+                <div class="cloud-puff" style="width: 130px; height: 120px; left: 80px; top: 0;"></div>
+                <div class="cloud-puff" style="width: 150px; height: 75px; left: 180px; top: 12px;"></div>
+                <div class="cloud-puff" style="width: 100px; height: 85px; left: 290px; top: 5px;"></div>
+            </div>
+            <div class="cloud cloud-6" style="top: 15%; opacity: 0.09;">
+                <div class="cloud-shadow" style="width: 170px; height: 48px; left: 9px; top: 34px;"></div>
+                <div class="cloud-puff" style="width: 130px; height: 65px; left: 0; top: 10px;"></div>
+                <div class="cloud-puff" style="width: 90px; height: 80px; left: 45px; top: 0;"></div>
+                <div class="cloud-puff" style="width: 115px; height: 58px; left: 110px; top: 16px;"></div>
+            </div>
+            <div class="cloud cloud-7" style="top: 85%; opacity: 0.1;">
+                <div class="cloud-shadow" style="width: 190px; height: 52px; left: 11px; top: 36px;"></div>
+                <div class="cloud-puff" style="width: 145px; height: 72px; left: 0; top: 9px;"></div>
+                <div class="cloud-puff" style="width: 100px; height: 88px; left: 55px; top: 0;"></div>
+                <div class="cloud-puff" style="width: 125px; height: 62px; left: 130px; top: 14px;"></div>
+            </div>
+            <div class="cloud cloud-8" style="top: 45%; opacity: 0.08;">
+                <div class="cloud-shadow" style="width: 150px; height: 42px; left: 7px; top: 30px;"></div>
+                <div class="cloud-puff" style="width: 110px; height: 55px; left: 0; top: 6px;"></div>
+                <div class="cloud-puff" style="width: 75px; height: 70px; left: 35px; top: 0;"></div>
+                <div class="cloud-puff" style="width: 95px; height: 50px; left: 85px; top: 12px;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="main-container">
+        <div class="card">
+            <div class="card-content">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                        <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                        <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                    </svg>
+                </div>
+                
+                <h1 class="card-title">I had a feeling you'd say "No"</h1>
+                
+                <p class="card-message">So I removed that option… problem solved</p>
+                
+                <div class="divider"></div>
+                
+                <div class="buttons-container">
+                    <button class="btn btn-yes" id="yesBtn">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Canvas & Context Initialization
+        const starsCanvas = document.getElementById('starsCanvas');
+        const shootingCanvas = document.getElementById('shootingCanvas');
+        const shimmerCanvas = document.getElementById('shimmerCanvas');
+        const starsCtx = starsCanvas.getContext('2d');
+        const shootingCtx = shootingCanvas.getContext('2d');
+        const shimmerCtx = shimmerCanvas.getContext('2d');
+        
+        let animationFrameId = null;
+        let stars = [];
+        let shootingStars = [];
+        let shimmerStars = [];
+        
+        // Resize Handler
+        function resizeCanvas() {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            [starsCanvas, shootingCanvas, shimmerCanvas].forEach(canvas => {
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
+            });
+            
+            starsCtx.scale(dpr, dpr);
+            shootingCtx.scale(dpr, dpr);
+            shimmerCtx.scale(dpr, dpr);
+            
+            initStars();
+            initShimmerStars();
+        }
+        
+        // Stars Initialization
+        function initStars() {
+            stars = [];
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const numStars = Math.min(Math.max(Math.floor((width * height) / 1800), 150), 600);
+            
+            for (let i = 0; i < numStars; i++) {
+                const brightness = Math.random();
+                const colorRand = Math.random();
+                let color;
+                
+                if (colorRand < 0.6) color = { r: 255, g: 255, b: 255 };
+                else if (colorRand < 0.75) color = { r: 200, g: 220, b: 255 };
+                else if (colorRand < 0.9) color = { r: 255, g: 240, b: 200 };
+                else color = { r: 255, g: 200, b: 180 };
+                
+                stars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    radius: Math.max(0.3, brightness < 0.1 ? 0.4 : brightness < 0.3 ? 0.8 : brightness < 0.6 ? 1.2 : brightness < 0.85 ? 1.6 : 2.2),
+                    baseOpacity: 0.4 + brightness * 0.6,
+                    twinkleSpeed: 0.008 + Math.random() * 0.025,
+                    twinklePhase: Math.random() * Math.PI * 2,
+                    color: color,
+                    isBright: brightness > 0.85
+                });
+            }
+        }
+        
+        // Draw Stars
+        function drawStars(time) {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            starsCtx.clearRect(0, 0, width, height);
+            
+            for (let i = 0; i < stars.length; i++) {
+                const star = stars[i];
+                const twinkle = Math.sin(time * star.twinkleSpeed + star.twinklePhase);
+                const opacity = Math.max(0.15, Math.min(1, star.baseOpacity + twinkle * 0.35));
+                const radius = Math.max(0.3, star.radius);
+                
+                if (star.isBright) {
+                    const glowRadius = Math.max(1, radius * 4);
+                    const glow = starsCtx.createRadialGradient(star.x, star.y, 0, star.x, star.y, glowRadius);
+                    glow.addColorStop(0, 'rgba(' + star.color.r + ',' + star.color.g + ',' + star.color.b + ',' + (opacity * 0.4) + ')');
+                    glow.addColorStop(0.5, 'rgba(' + star.color.r + ',' + star.color.g + ',' + star.color.b + ',' + (opacity * 0.1) + ')');
+                    glow.addColorStop(1, 'rgba(' + star.color.r + ',' + star.color.g + ',' + star.color.b + ',0)');
+                    starsCtx.beginPath();
+                    starsCtx.arc(star.x, star.y, glowRadius, 0, Math.PI * 2);
+                    starsCtx.fillStyle = glow;
+                    starsCtx.fill();
+                }
+                
+                const gradient = starsCtx.createRadialGradient(star.x, star.y, 0, star.x, star.y, Math.max(0.5, radius * 1.8));
+                gradient.addColorStop(0, 'rgba(' + star.color.r + ',' + star.color.g + ',' + star.color.b + ',' + opacity + ')');
+                gradient.addColorStop(0.4, 'rgba(' + star.color.r + ',' + star.color.g + ',' + star.color.b + ',' + (opacity * 0.6) + ')');
+                gradient.addColorStop(1, 'rgba(' + star.color.r + ',' + star.color.g + ',' + star.color.b + ',0)');
+                starsCtx.beginPath();
+                starsCtx.arc(star.x, star.y, Math.max(0.5, radius * 1.8), 0, Math.PI * 2);
+                starsCtx.fillStyle = gradient;
+                starsCtx.fill();
+            }
+        }
+        
+        // Shimmer Stars
+        function initShimmerStars() {
+            shimmerStars = [];
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const numShimmer = Math.floor(Math.random() * 8) + 12;
+            
+            for (let i = 0; i < numShimmer; i++) {
+                shimmerStars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    radius: 1.5 + Math.random() * 2,
+                    phase: Math.random() * Math.PI * 2,
+                    speed: 0.02 + Math.random() * 0.04
+                });
+            }
+        }
+        
+        function drawShimmerStars(time) {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            shimmerCtx.clearRect(0, 0, width, height);
+            
+            for (let i = 0; i < shimmerStars.length; i++) {
+                const s = shimmerStars[i];
+                const shimmer = Math.sin(time * s.speed + s.phase);
+                const opacity = Math.max(0, (shimmer + 1) * 0.5);
+                
+                if (opacity > 0.7) {
+                    const radius = Math.max(1, s.radius);
+                    const glowSize = radius * 6;
+                    
+                    shimmerCtx.save();
+                    shimmerCtx.translate(s.x, s.y);
+                    shimmerCtx.rotate(time * 0.001);
+                    
+                    const gradient = shimmerCtx.createRadialGradient(0, 0, 0, 0, 0, glowSize);
+                    gradient.addColorStop(0, 'rgba(255, 255, 255, ' + opacity + ')');
+                    gradient.addColorStop(0.2, 'rgba(255, 250, 220, ' + (opacity * 0.6) + ')');
+                    gradient.addColorStop(0.5, 'rgba(255, 245, 200, ' + (opacity * 0.2) + ')');
+                    gradient.addColorStop(1, 'rgba(255, 240, 180, 0)');
+                    
+                    shimmerCtx.beginPath(); shimmerCtx.moveTo(0, -glowSize); shimmerCtx.lineTo(0, glowSize);
+                    shimmerCtx.strokeStyle = 'rgba(255, 255, 255, ' + (opacity * 0.4) + ')'; shimmerCtx.lineWidth = 1; shimmerCtx.stroke();
+                    
+                    shimmerCtx.beginPath(); shimmerCtx.moveTo(-glowSize, 0); shimmerCtx.lineTo(glowSize, 0); shimmerCtx.stroke();
+                    
+                    shimmerCtx.beginPath(); shimmerCtx.arc(0, 0, glowSize, 0, Math.PI * 2); shimmerCtx.fillStyle = gradient; shimmerCtx.fill();
+                    
+                    shimmerCtx.restore();
+                }
+            }
+        }
+        
+        // Shooting Star Class
+        class ShootingStar {
+            constructor() {
+                this.active = false; this.x = 0; this.y = 0; this.length = 100;
+                this.speed = 12; this.opacity = 0.9; this.angle = Math.PI / 4;
+                this.life = 0; this.maxLife = 100; this.trail = [];
+            }
+            spawn() {
+                const width = window.innerWidth; const height = window.innerHeight;
+                this.x = Math.random() * width * 0.9; this.y = Math.random() * height * 0.3;
+                this.length = Math.max(60, 80 + Math.random() * 120);
+                this.speed = Math.max(8, 10 + Math.random() * 14);
+                this.opacity = 0.7 + Math.random() * 0.3;
+                this.angle = Math.PI / 5 + Math.random() * 0.5;
+                this.active = true; this.life = 0;
+                this.maxLife = 50 + Math.random() * 60; this.trail = [];
+            }
+            update() {
+                if (!this.active) return;
+                const speedX = Math.cos(this.angle) * this.speed;
+                const speedY = Math.sin(this.angle) * this.speed;
+                this.trail.unshift({ x: this.x, y: this.y, opacity: 1 });
+                if (this.trail.length > 15) this.trail.pop();
+                this.x += speedX; this.y += speedY; this.life++;
+                const width = window.innerWidth; const height = window.innerHeight;
+                if (this.x > width + 150 || this.y > height + 150 || this.life > this.maxLife) this.active = false;
+            }
+            draw(ctx) {
+                if (!this.active) return;
+                const fadeOut = Math.max(0, 1 - (this.life / this.maxLife));
+                const currentOpacity = this.opacity * fadeOut;
+                
+                for (let i = 0; i < this.trail.length; i++) {
+                    const t = this.trail[i];
+                    const trailOpacity = currentOpacity * (1 - i / this.trail.length) * 0.5;
+                    const trailRadius = Math.max(0.5, 2 - i * 0.1);
+                    ctx.beginPath(); ctx.arc(t.x, t.y, trailRadius, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255, 255, 255, ' + trailOpacity + ')'; ctx.fill();
+                }
+                
+                const tailX = this.x - Math.cos(this.angle) * this.length;
+                const tailY = this.y - Math.sin(this.angle) * this.length;
+                const gradient = ctx.createLinearGradient(tailX, tailY, this.x, this.y);
+                gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+                gradient.addColorStop(0.3, 'rgba(255, 250, 230, ' + (currentOpacity * 0.3) + ')');
+                gradient.addColorStop(0.7, 'rgba(255, 255, 255, ' + (currentOpacity * 0.7) + ')');
+                gradient.addColorStop(1, 'rgba(255, 255, 255, ' + currentOpacity + ')');
+                ctx.beginPath(); ctx.moveTo(tailX, tailY); ctx.lineTo(this.x, this.y);
+                ctx.strokeStyle = gradient; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.stroke();
+                
+                const headGlow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 6);
+                headGlow.addColorStop(0, 'rgba(255, 255, 255, ' + currentOpacity + ')');
+                headGlow.addColorStop(0.5, 'rgba(255, 250, 220, ' + (currentOpacity * 0.5) + ')');
+                headGlow.addColorStop(1, 'rgba(255, 245, 200, 0)');
+                ctx.beginPath(); ctx.arc(this.x, this.y, 6, 0, Math.PI * 2); ctx.fillStyle = headGlow; ctx.fill();
+            }
+        }
+        
+        function initShootingStars() {
+            shootingStars = [];
+            for (let i = 0; i < 6; i++) shootingStars.push(new ShootingStar());
+        }
+        
+        function manageShootingStars() {
+            if (Math.random() < 0.008) {
+                for (let i = 0; i < shootingStars.length; i++) {
+                    if (!shootingStars[i].active) { shootingStars[i].spawn(); break; }
+                }
+            }
+        }
+        
+        // Animation Loop
+        function animate() {
+            const time = Date.now() * 0.001;
+            drawStars(time);
+            drawShimmerStars(time);
+            const width = window.innerWidth; const height = window.innerHeight;
+            shootingCtx.clearRect(0, 0, width, height);
+            manageShootingStars();
+            for (let i = 0; i < shootingStars.length; i++) { shootingStars[i].update(); shootingStars[i].draw(shootingCtx); }
+            animationFrameId = requestAnimationFrame(animate);
+        }
+        
+        // Button Navigation
+        document.getElementById('yesBtn').addEventListener('click', function() {
+            window.location.href = 'main.html';
+        });
+        
+        // Resize & Visibility Handlers
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(resizeCanvas, 150);
+        });
+        
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden && animationFrameId) {
+                cancelAnimationFrame(animationFrameId); animationFrameId = null;
+            } else if (!document.hidden && !animationFrameId) animate();
+        });
+        
+        // Initialize
+        resizeCanvas();
+        initShootingStars();
+        animate();
+    </script>
+</body>
+</html>

@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>A Letter For You</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-deep: #05080f;
+            --bg-mid: #0a1025;
+            --bg-upper: #0f1633;
+            --moon-core: #fffce8;
+            --moon-light: #f7ecc6;
+            --moon-mid: #e8d9a8;
+            --moon-dark: #c4b078;
+            --moon-glow: #ffe4a0;
+            --accent-gold: #e8c547;
+            --accent-warm: #d4a853;
+            --accent-pink: #f472b6;
+            --card-bg: rgba(12, 18, 38, 0.92);
+            --border: rgba(232, 197, 71, 0.12);
+            --safe-area-top: env(safe-area-inset-top, 0px);
+            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-deep);
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            color: #e8e8e8;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .night-sky {
+            position: fixed;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse at 80% 10%, rgba(30, 40, 80, 0.3) 0%, transparent 50%),
+                radial-gradient(ellipse at 20% 80%, rgba(20, 30, 60, 0.2) 0%, transparent 40%),
+                radial-gradient(ellipse at 50% 50%, rgba(15, 22, 51, 0.8) 0%, transparent 70%),
+                linear-gradient(180deg, 
+                    #020408 0%,
+                    #050a14 10%,
+                    #0a1025 30%,
+                    #0d1530 50%,
+                    #0a0f20 70%,
+                    #050810 100%
+                );
+            z-index: -10;
+        }
+
+        .milky-way {
+            position: fixed;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse 120% 40% at 30% 30%, rgba(100, 120, 180, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse 100% 30% at 70% 60%, rgba(80, 100, 150, 0.02) 0%, transparent 40%);
+            z-index: -9;
+            animation: milkyDrift 120s linear infinite;
+        }
+
+        @keyframes milkyDrift {
+            0% { transform: translateX(0) translateY(0); }
+            50% { transform: translateX(-5%) translateY(2%); }
+            100% { transform: translateX(0) translateY(0); }
+        }
+
+        #starsCanvas, #shootingCanvas, #shimmerCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #starsCanvas { z-index: -8; }
+        #shootingCanvas { z-index: -7; pointer-events: none; }
+        #shimmerCanvas { z-index: -6; pointer-events: none; }
+
+        .moon-container {
+            position: fixed;
+            z-index: -5;
+            filter: drop-shadow(0 0 40px rgba(255, 228, 160, 0.4));
+        }
+
+        .moon {
+            border-radius: 50%;
+            position: relative;
+            background: radial-gradient(circle at 38% 38%, 
+                var(--moon-core) 0%,
+                var(--moon-light) 25%,
+                var(--moon-mid) 55%,
+                var(--moon-dark) 85%,
+                #a89060 100%
+            );
+            box-shadow: 
+                0 0 80px 30px rgba(255, 228, 160, 0.25),
+                0 0 160px 60px rgba(255, 228, 160, 0.12),
+                0 0 240px 100px rgba(255, 228, 160, 0.06),
+                inset -25px -20px 50px rgba(100, 80, 40, 0.5),
+                inset 10px 10px 30px rgba(255, 255, 240, 0.2);
+            animation: moonGlow 6s ease-in-out infinite, moonFloat 20s ease-in-out infinite;
+        }
+
+        .moon::before, .moon::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 40%, 
+                rgba(160, 140, 100, 0.4) 0%,
+                rgba(140, 120, 80, 0.3) 50%,
+                transparent 70%
+            );
+            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .moon::before {
+            width: 25%; height: 25%;
+            top: 20%; left: 25%;
+            box-shadow: 
+                inset 2px 2px 5px rgba(0, 0, 0, 0.3),
+                90px 30px 0 15px rgba(160, 140, 100, 0.25),
+                40px 70px 0 8px rgba(160, 140, 100, 0.2),
+                100px 85px 0 20px rgba(160, 140, 100, 0.18),
+                -10px 90px 0 12px rgba(160, 140, 100, 0.22),
+                70px 110px 0 6px rgba(160, 140, 100, 0.15),
+                130px 50px 0 10px rgba(160, 140, 100, 0.2);
+        }
+
+        .moon::after {
+            width: 15%; height: 15%;
+            top: 55%; left: 15%;
+            box-shadow: 
+                inset 1px 1px 3px rgba(0, 0, 0, 0.25),
+                120px -20px 0 8px rgba(160, 140, 100, 0.2),
+                60px 20px 0 5px rgba(160, 140, 100, 0.18);
+        }
+
+        .moon-craters {
+            position: absolute; inset: 0;
+            border-radius: 50%; overflow: hidden;
+        }
+        .moon-craters::before {
+            content: ''; position: absolute; width: 100%; height: 100%;
+            background: 
+                radial-gradient(circle at 65% 35%, rgba(120, 100, 60, 0.15) 0%, transparent 8%),
+                radial-gradient(circle at 45% 65%, rgba(130, 110, 70, 0.12) 0%, transparent 6%),
+                radial-gradient(circle at 75% 55%, rgba(125, 105, 65, 0.1) 0%, transparent 5%),
+                radial-gradient(circle at 30% 40%, rgba(135, 115, 75, 0.08) 0%, transparent 4%),
+                radial-gradient(circle at 55% 25%, rgba(140, 120, 80, 0.1) 0%, transparent 3%);
+        }
+
+        @keyframes moonGlow {
+            0%, 100% { box-shadow: 0 0 80px 30px rgba(255, 228, 160, 0.25), 0 0 160px 60px rgba(255, 228, 160, 0.12), 0 0 240px 100px rgba(255, 228, 160, 0.06), inset -25px -20px 50px rgba(100, 80, 40, 0.5), inset 10px 10px 30px rgba(255, 255, 240, 0.2); }
+            50% { box-shadow: 0 0 100px 40px rgba(255, 228, 160, 0.35), 0 0 180px 80px rgba(255, 228, 160, 0.18), 0 0 280px 120px rgba(255, 228, 160, 0.08), inset -25px -20px 50px rgba(100, 80, 40, 0.5), inset 10px 10px 30px rgba(255, 255, 240, 0.2); }
+        }
+        @keyframes moonFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(1deg); }
+        }
+
+        .clouds-container {
+            position: fixed; inset: 0; z-index: -4; overflow: hidden;
+            perspective: 1500px; transform-style: preserve-3d;
+        }
+        .cloud-layer { position: absolute; inset: 0; transform-style: preserve-3d; }
+        .cloud {
+            position: absolute; filter: blur(2px); opacity: 0;
+            animation: cloudFadeIn 2s ease-out forwards;
+        }
+        @keyframes cloudFadeIn { to { opacity: 1; } }
+        .cloud-puff {
+            position: absolute;
+            background: radial-gradient(ellipse at center, rgba(180, 190, 210, 0.5) 0%, rgba(140, 150, 170, 0.25) 40%, transparent 70%);
+            border-radius: 50%;
+        }
+        .cloud-shadow {
+            position: absolute;
+            background: radial-gradient(ellipse at center, rgba(5, 8, 20, 0.3) 0%, transparent 60%);
+            border-radius: 50%; filter: blur(8px);
+        }
+        .cloud-1 { animation: cloudMove1 45s linear infinite; }
+        .cloud-2 { animation: cloudMove2 55s linear infinite; }
+        .cloud-3 { animation: cloudMove3 65s linear infinite; }
+        .cloud-4 { animation: cloudMove4 50s linear infinite; }
+        .cloud-5 { animation: cloudMove5 70s linear infinite; }
+        .cloud-6 { animation: cloudMove6 60s linear infinite; }
+        .cloud-7 { animation: cloudMove1 80s linear infinite; }
+        .cloud-8 { animation: cloudMove2 75s linear infinite; }
+
+        @keyframes cloudMove1 { 0% { transform: translateX(-200px) translateZ(20px) scale(1.6); } 100% { transform: translateX(calc(100vw + 250px)) translateZ(20px) scale(1.6); } }
+        @keyframes cloudMove2 { 0% { transform: translateX(calc(100vw + 150px)) translateZ(60px) scale(1.4); } 100% { transform: translateX(-200px) translateZ(60px) scale(1.4); } }
+        @keyframes cloudMove3 { 0% { transform: translateX(-250px) translateZ(100px) scale(1.2); } 100% { transform: translateX(calc(100vw + 300px)) translateZ(100px) scale(1.2); } }
+        @keyframes cloudMove4 { 0% { transform: translateX(calc(100vw + 200px)) translateZ(40px) scale(1.8); } 100% { transform: translateX(-250px) translateZ(40px) scale(1.8); } }
+        @keyframes cloudMove5 { 0% { transform: translateX(-180px) translateZ(80px) scale(1.3); } 100% { transform: translateX(calc(100vw + 220px)) translateZ(80px) scale(1.3); } }
+        @keyframes cloudMove6 { 0% { transform: translateX(calc(100vw + 180px)) translateZ(30px) scale(1.5); } 100% { transform: translateX(-220px) translateZ(30px) scale(1.5); } }
+
+        .main-container {
+            min-height: 100vh; min-height: 100dvh;
+            display: flex; flex-direction: column;
+            align-items: center;
+            padding: 16px;
+            padding-top: max(80px, var(--safe-area-top));
+            /* Increased bottom padding to make space for fixed bottom videos */
+            padding-bottom: max(180px, calc(var(--safe-area-bottom) + 160px)); 
+            position: relative; z-index: 1;
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            padding-top: max(12px, var(--safe-area-top));
+            background: linear-gradient(180deg, rgba(5, 8, 15, 0.98) 0%, rgba(5, 8, 15, 0.9) 70%, transparent 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(232, 197, 71, 0.1);
+            border: 1px solid rgba(232, 197, 71, 0.2);
+            border-radius: 10px;
+            padding: 8px 14px;
+            color: var(--accent-gold);
+            font-size: 0.85rem;
+            font-weight: 500;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(232, 197, 71, 0.15);
+            border-color: var(--accent-gold);
+        }
+
+        .back-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        /* Card */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--border);
+            border-radius: clamp(18px, 5vw, 28px);
+            padding: clamp(22px, 5vw, 40px);
+            max-width: 520px; width: 100%;
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6), 0 0 100px 30px rgba(232, 197, 71, 0.03), 0 0 1px rgba(255, 255, 255, 0.1) inset;
+            animation: cardFloat 7s ease-in-out infinite;
+            position: relative; overflow: hidden;
+            margin-top: 20px;
+        }
+        .card::before {
+            content: ''; position: absolute; top: -100%; left: -100%; width: 300%; height: 300%;
+            background: radial-gradient(circle at 20% 20%, rgba(232, 197, 71, 0.04) 0%, transparent 30%), radial-gradient(circle at 80% 80%, rgba(212, 168, 83, 0.03) 0%, transparent 25%);
+            pointer-events: none; animation: cardShine 15s linear infinite;
+        }
+        @keyframes cardShine { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-6px) rotate(0.3deg); }
+            75% { transform: translateY(-10px) rotate(-0.3deg); }
+        }
+
+        .card-content { position: relative; z-index: 1; text-align: center; }
+        
+        /* Letter Icon */
+        .letter-icon {
+            width: clamp(70px, 18vw, 90px);
+            height: clamp(70px, 18vw, 90px);
+            margin: 0 auto clamp(16px, 4vw, 24px);
+            background: linear-gradient(145deg, rgba(232, 197, 71, 0.15) 0%, rgba(212, 168, 83, 0.08) 100%);
+            border-radius: 50%;
+            border: 1px solid rgba(232, 197, 71, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: letterPulse 3s ease-in-out infinite;
+        }
+
+        .letter-icon svg {
+            width: clamp(35px, 9vw, 45px);
+            height: clamp(35px, 9vw, 45px);
+            color: var(--accent-gold);
+        }
+
+        @keyframes letterPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(232, 197, 71, 0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 0 25px 8px rgba(232, 197, 71, 0.15); }
+        }
+
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.4rem, 5.5vw, 1.9rem);
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-gold) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(232, 197, 71, 0.25) 20%, rgba(232, 197, 71, 0.4) 50%, rgba(232, 197, 71, 0.25) 80%, transparent 100%);
+            margin: clamp(16px, 4vw, 24px) 0;
+        }
+
+        .card-message {
+            font-size: clamp(0.8rem, 2.8vw, 0.92rem);
+            line-height: 1.75;
+            color: #b8c0cc;
+            text-align: left;
+        }
+
+        .card-message p {
+            margin-bottom: clamp(10px, 2.5vw, 16px);
+        }
+
+        .card-message .highlight {
+            color: var(--accent-gold);
+            font-weight: 500;
+        }
+
+        .card-message .highlight-pink {
+            color: var(--accent-pink);
+            font-weight: 500;
+        }
+
+        .card-message .emoji {
+            font-size: 1.1em;
+        }
+
+        .closing-quote {
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1rem, 3.5vw, 1.2rem);
+            font-style: italic;
+            color: var(--accent-pink);
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(244, 114, 182, 0.2);
+        }
+
+        /* Decorative Elements */
+        .star-decoration {
+            position: absolute;
+            color: var(--accent-gold);
+            opacity: 0.15;
+            font-size: 1.5rem;
+        }
+        .star-1 { top: 8%; left: 5%; animation: twinkleStar 3s ease-in-out infinite; }
+        .star-2 { top: 12%; right: 8%; animation: twinkleStar 4s ease-in-out infinite 0.5s; }
+        .star-3 { bottom: 18%; left: 8%; animation: twinkleStar 3.5s ease-in-out infinite 1s; }
+        .star-4 { bottom: 8%; right: 5%; animation: twinkleStar 4.5s ease-in-out infinite 1.5s; }
+
+        @keyframes twinkleStar {
+            0%, 100% { opacity: 0.15; transform: scale(1); }
+            50% { opacity: 0.35; transform: scale(1.2); }
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 360px) {
+            .main-container { padding: 12px; padding-top: 70px; }
+            .card { padding: 18px; }
+            .nav-bar { padding: 10px 12px; }
+            .back-btn { padding: 6px 10px; font-size: 0.8rem; }
+            .page-title { font-size: 1rem; }
+            .moon-container { top: 12%; right: 2%; }
+            .moon { width: 55px; height: 55px; }
+        }
+        @media (min-width: 361px) and (max-width: 390px) {
+            .moon-container { top: 10%; right: 3%; }
+            .moon { width: 65px; height: 65px; }
+        }
+        @media (min-width: 391px) and (max-width: 430px) {
+            .moon-container { top: 10%; right: 4%; }
+            .moon { width: 75px; height: 75px; }
+        }
+        @media (min-width: 431px) and (max-width: 500px) {
+            .moon-container { top: 8%; right: 5%; }
+            .moon { width: 85px; height: 85px; }
+        }
+        @media (min-width: 501px) and (max-width: 768px) {
+            .moon-container { top: 8%; right: 6%; }
+            .moon { width: 95px; height: 95px; }
+        }
+        @media (min-width: 769px) {
+            .moon-container { top: 8%; right: 8%; }
+            .moon { width: 110px; height: 110px; }
+        }
+        @media (min-width: 1024px) {
+            .moon { width: 130px; height: 130px; }
+        }
+        @media (max-height: 500px) and (orientation: landscape) {
+            .main-container { padding: 10px; padding-top: 70px; }
+            .card { padding: 16px 20px; animation: none; }
+            .moon-container { top: 5%; }
+            .moon { width: 50px; height: 50px; }
+            .letter-icon { width: 50px; height: 50px; margin-bottom: 10px; }
+            .letter-icon svg { width: 24px; height: 24px; }
+        }
+        @supports (padding-top: env(safe-area-inset-top)) {
+            .main-container {
+                padding-top: max(80px, env(safe-area-inset-top));
+            }
+            .nav-bar {
+                padding-top: max(12px, env(safe-area-inset-top));
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        .back-btn:focus-visible {
+            outline: 2px solid var(--accent-gold);
+            outline-offset: 2px;
+        }
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .card { border: 0.5px solid var(--border); }
+        }
+        
+        /* --- VIDEO STYLES --- */
+
+        /* Video inside card */
+        .video-container-bottom {
+            margin-top: 24px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(232, 197, 71, 0.3);
+            max-width: 100%;
+        }
+        
+        .video-container-bottom video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* 1. Bottom Right Video */
+        .video-container-bottom-right {
+            position: fixed;
+            /* Safe area calculation for iPhone */
+            bottom: max(20px, var(--safe-area-bottom)); 
+            right: 16px;
+            z-index: 50;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(232, 197, 71, 0.3);
+            width: 200px;
+        }
+        
+        .video-container-bottom-right video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* 2. Bottom Left Video (Formerly Left Side) */
+        .video-container-left {
+            position: fixed;
+            /* Safe area calculation for iPhone */
+            bottom: max(20px, var(--safe-area-bottom));
+            left: 16px;
+            z-index: 50;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(232, 197, 71, 0.3);
+            width: 180px;
+        }
+        
+        .video-container-left video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .video-caption {
+            text-align: center;
+            margin-top: 0px; /* Adjusted */
+            font-size: 0.7rem;
+            color: #fff;
+            font-style: italic;
+            background: rgba(0,0,0,0.7);
+            padding: 4px;
+        }
+
+        /* Mobile Responsive Fixes */
+        @media (max-width: 768px) {
+            /* On mobile, place them side-by-side at bottom */
+            .video-container-bottom-right {
+                width: 48%; /* Fluid width */
+                max-width: 160px;
+                right: 10px;
+                /* Slightly higher on mobile to avoid conflict if stacked, but here side-by-side */
+            }
+
+            .video-container-left {
+                width: 48%;
+                max-width: 160px;
+                left: 10px;
+            }
+
+            .video-caption {
+                font-size: 0.6rem;
+            }
+        }
+
+        /* Very small screens */
+        @media (max-width: 360px) {
+             .video-container-bottom-right {
+                width: 45%;
+                max-width: 130px;
+            }
+            .video-container-left {
+                width: 45%;
+                max-width: 130px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="night-sky"></div>
+    <div class="milky-way"></div>
+    <canvas id="starsCanvas"></canvas>
+    <canvas id="shootingCanvas"></canvas>
+    <canvas id="shimmerCanvas"></canvas>
+    
+    <div class="moon-container">
+        <div class="moon"><div class="moon-craters"></div></div>
+    </div>
+    
+    <div class="clouds-container">
+        <div class="cloud-layer">
+            <div class="cloud cloud-1" style="top: 8%; opacity: 0.12;">
+                <div class="cloud-shadow" style="width: 180px; height: 50px; left: 10px; top: 35px;"></div>
+                <div class="cloud-puff" style="width: 140px; height: 70px; left: 0; top: 10px;"></div>
+                <div class="cloud-puff" style="width: 100px; height: 90px; left: 50px; top: 0;"></div>
+                <div class="cloud-puff" style="width: 120px; height: 60px; left: 120px; top: 20px;"></div>
+                <div class="cloud-puff" style="width: 80px; height: 70px; left: 180px; top: 5px;"></div>
+            </div>
+            <div class="cloud cloud-2" style="top: 22%; opacity: 0.1;">
+                <div class="cloud-shadow" style="width: 160px; height: 45px; left: 8px; top: 32px;"></div>
+                <div class="cloud-puff" style="width: 120px; height: 60px; left: 0; top: 8px;"></div>
+                <div class="cloud-puff" style="width: 85px; height: 75px; left: 40px; top: 0;"></div>
+                <div class="cloud-puff" style="width: 110px; height: 55px; left: 100px; top: 15px;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Navigation Bar -->
+    <nav class="nav-bar">
+        <button class="back-btn" id="backBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            Back
+        </button>
+        <span class="page-title">Letter</span>
+        <div style="width: 70px;"></div>
+    </nav>
+    
+    <!-- Bottom Right Video -->
+    <div class="video-container-bottom-right">
+        <video id="topVideo" controls preload="auto" playsinline>
+            <source src="chal mera maa paya da chan ban ja.mp4" type="video/mp4">
+        </video>
+        <div class="video-caption">Sochna zaara Zanib ❤️</div>
+    </div>
+    
+    <!-- Bottom Left Video -->
+    <div class="video-container-left">
+        <video id="leftVideo" controls preload="auto" playsinline>
+            <source src="zanib.mp4" type="video/mp4">
+        </video>
+        
+    </div>
+    
+    <div class="main-container">
+        <div class="card">
+            <span class="star-decoration star-1">✦</span>
+            <span class="star-decoration star-2">✧</span>
+            <span class="star-decoration star-3">✦</span>
+            <span class="star-decoration star-4">✧</span>
+            
+            <div class="card-content">
+                <div class="letter-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                </div>
+                
+                <h1 class="card-title">A Letter For You</h1>
+                
+                <div class="divider"></div>
+                
+                <div class="card-message">
+                    <p>I know you might be scolding me right now, or thinking that all of this is nonsense… yet my heart insists that I speak, so here I am saying it.</p>
+                    
+                    <p>Even today, I still don't fully understand this feeling… I never met you in real life, never saw you face to face. And I know that maybe you never truly loved me either. Still, somehow, after you left, my heart never made space for anyone else. Sometimes I wonder what kind of feeling this is… one that is both hard to understand and impossible to forget.</p>
+                    
+                    <p>I had once told you something — just as I love my mother with truth, respect, and all my heart, I love you with the same honesty and sincerity. And no one can ever take my mother's place… perhaps that is why giving your place to someone else feels impossible for me as well.</p>
+                    
+                    <p>And one thing I wholeheartedly acknowledge… you are truly an <span class="highlight">incredible person</span>. Not just good, but extraordinarily good. I don't just say this — I feel it. When you loved me, your love was pure, real, and unmatched. You are someone who loves not just with words, but with your heart.</p>
+                    
+                    <p>Your character is like <span class="highlight">pure gold</span> — honest, clean, and precious. Honestly, I would even call it a <span class="highlight">diamond</span>: strong, shining, flawless. In today's world, a heart this pure and a character this genuine is extremely rare.</p>
+                    
+                    <p>I could call you the moon, but even the moon has its flaws… your character has none. That is why you seem more beautiful to me than the moon itself. True beauty doesn't lie in the face but in the heart and intentions — and your heart is unbelievably pure.</p>
+                    
+                    <p>Yes, you are a little crazy sometimes <span class="emoji">😄</span>, but it's the kind of playful craziness that makes anyone smile. Maybe that's why you feel so real — completely genuine, utterly authentic.</p>
+                    
+                    <p>I still remember when you told me, <span class="highlight">"Never even think about a second marriage in life."</span> I laughed and said, "I don't know if the first one will even happen." At the time, it felt like a joke… but now I realize that those words carried your care and genuine love.</p>
+                    
+                    <p>Honestly, one thing about you has always stayed with me: your heart is pure, your intentions are pure, and your character is invaluable. In a world full of superficiality, true value lies in a person's character — and yours is one of those rare characters that commands respect naturally.</p>
+                    
+                    <p>Wherever you are, and with whoever you are, I pray that Allah always keeps you happy. May your life be filled with peace, respect, and every joy you deserve. I pray from the bottom of my heart that Allah protects you from every sorrow and makes every path in your life easy and bright.</p>
+                    
+                    <p>And yes… a little crazy thing to add: I am still waiting for you, and I will continue to wait. I know maybe you'll never come back… but who can stop a heart from hoping?</p>
+                    
+                    <p>Who knows… at some twist of life, someday, you might come back. Whether it's <span class="highlight">10 years later, 20 years later…</span> or even <span class="highlight">60 years later</span>.</p>
+                    
+                    <p>If I'm still alive then, I will probably just smile and quietly say:</p>
+                </div>
+                
+                <p class="closing-quote">"Look… I'm still right here." <span class="emoji">💕</span></p>
+                
+                <!-- Bottom Video (Inside Card) -->
+                <div class="video-container-bottom">
+                    <video playsinline controls>
+                        <source src="Raah Dekhenge Teri Chahe Zamane Lag ja a.mp4" type="video/mp4">
+                    </video>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Canvas & Context Initialization
+        const starsCanvas = document.getElementById('starsCanvas');
+        const shootingCanvas = document.getElementById('shootingCanvas');
+        const shimmerCanvas = document.getElementById('shimmerCanvas');
+        const starsCtx = starsCanvas.getContext('2d');
+        const shootingCtx = shootingCanvas.getContext('2d');
+        const shimmerCtx = shimmerCanvas.getContext('2d');
+        
+        let animationFrameId = null;
+        let stars = [];
+        let shootingStars = [];
+        let shimmerStars = [];
+        
+        // Resize Handler
+        function resizeCanvas() {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            [starsCanvas, shootingCanvas, shimmerCanvas].forEach(canvas => {
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
+            });
+            
+            starsCtx.scale(dpr, dpr);
+            shootingCtx.scale(dpr, dpr);
+            shimmerCtx.scale(dpr, dpr);
+            
+            initStars();
+            initShimmerStars();
+        }
+        
+        // Stars Initialization
+        function initStars() {
+            stars = [];
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const numStars = Math.min(Math.max(Math.floor((width * height) / 1800), 150), 600);
+            
+            for (let i = 0; i < numStars; i++) {
+                const brightness = Math.random();
+                const colorRand = Math.random();
+                let color;
+                
+                if (colorRand < 0.6) color = { r: 255, g: 255, b: 255 };
+                else if (colorRand < 0.75) color = { r: 200, g: 220, b: 255 };
+                else if (colorRand < 0.9) color = { r: 255, g: 240, b: 200 };
+                else color = { r: 255, g: 200, b: 180 };
+                
+                stars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    radius: Math.max(0.3, brightness < 0.1 ? 0.4 : brightness < 0.3 ? 0.8 : brightness < 0.6 ? 1.2 : brightness < 0.85 ? 1.6 : 2.2),
+                    baseOpacity: 0.4 + brightness * 0.6,
+                    twinkleSpeed: 0.008 + Math.random() * 0.025,
+                    twinklePhase: Math.random() * Math.PI * 2,
+                    color: color,
+                    isBright: brightness > 0.85
+                });
+            }
+        }
+        
+        // Draw Stars
+        function drawStars(time) {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            starsCtx.clearRect(0, 0, width, height);
+            
+            for (let i = 0; i < stars.length; i++) {
+                const star = stars[i];
+                const twinkle = Math.sin(time * star.twinkleSpeed + star.twinklePhase);
+                const opacity = Math.max(0.15, Math.min(1, star.baseOpacity + twinkle * 0.35));
+                const radius = Math.max(0.3, star.radius);
+                
+                if (star.isBright) {
+                    const glowRadius = Math.max(1, radius * 4);
+                    const glow = starsCtx.createRadialGradient(star.x, star.y, 0, star.x, star.y, glowRadius);
+                    glow.addColorStop(0, 'rgba(' + star.color.r + ',' + star.color.g + ',' + star.color.b + ',' + (opacity * 0.4) + ')');
+                    glow.addColorStop(0.5, 'rgba(' + star.color.r + ',' + star.color.g + ',' + star.color.b + ',' + (opacity * 0.1) + ')');
+                    glow.addColorStop(1, 'rgba(' + star.color.r + ',' + star.color.g + ',' + star.color.b + ',0)');
+                    starsCtx.beginPath();
+                    starsCtx.arc(star.x, star.y, glowRadius, 0, Math.PI * 2);
+                    starsCtx.fillStyle = glow;
+                    starsCtx.fill();
+                }
+                
+                const gradient = starsCtx.createRadialGradient(star.x, star.y, 0, star.x, star.y, Math.max(0.5, radius * 1.8));
+                gradient.addColorStop(0, 'rgba(' + star.color.r + ',' + star.color.g + ',' + star.color.b + ',' + opacity + ')');
+                gradient.addColorStop(0.4, 'rgba(' + star.color.r + ',' + star.color.g + ',' + star.color.b + ',' + (opacity * 0.6) + ')');
+                gradient.addColorStop(1, 'rgba(' + star.color.r + ',' + star.color.g + ',' + star.color.b + ',0)');
+                starsCtx.beginPath();
+                starsCtx.arc(star.x, star.y, Math.max(0.5, radius * 1.8), 0, Math.PI * 2);
+                starsCtx.fillStyle = gradient;
+                starsCtx.fill();
+            }
+        }
+        
+        // Shimmer Stars
+        function initShimmerStars() {
+            shimmerStars = [];
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const numShimmer = Math.floor(Math.random() * 8) + 12;
+            
+            for (let i = 0; i < numShimmer; i++) {
+                shimmerStars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    radius: 1.5 + Math.random() * 2,
+                    phase: Math.random() * Math.PI * 2,
+                    speed: 0.02 + Math.random() * 0.04
+                });
+            }
+        }
+        
+        function drawShimmerStars(time) {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            shimmerCtx.clearRect(0, 0, width, height);
+            
+            for (let i = 0; i < shimmerStars.length; i++) {
+                const s = shimmerStars[i];
+                const shimmer = Math.sin(time * s.speed + s.phase);
+                const opacity = Math.max(0, (shimmer + 1) * 0.5);
+                
+                if (opacity > 0.7) {
+                    const radius = Math.max(1, s.radius);
+                    const glowSize = radius * 6;
+                    
+                    shimmerCtx.save();
+                    shimmerCtx.translate(s.x, s.y);
+                    shimmerCtx.rotate(time * 0.001);
+                    
+                    const gradient = shimmerCtx.createRadialGradient(0, 0, 0, 0, 0, glowSize);
+                    gradient.addColorStop(0, 'rgba(255, 255, 255, ' + opacity + ')');
+                    gradient.addColorStop(0.2, 'rgba(255, 250, 220, ' + (opacity * 0.6) + ')');
+                    gradient.addColorStop(0.5, 'rgba(255, 245, 200, ' + (opacity * 0.2) + ')');
+                    gradient.addColorStop(1, 'rgba(255, 240, 180, 0)');
+                    
+                    shimmerCtx.beginPath(); shimmerCtx.moveTo(0, -glowSize); shimmerCtx.lineTo(0, glowSize);
+                    shimmerCtx.strokeStyle = 'rgba(255, 255, 255, ' + (opacity * 0.4) + ')'; shimmerCtx.lineWidth = 1; shimmerCtx.stroke();
+                    
+                    shimmerCtx.beginPath(); shimmerCtx.moveTo(-glowSize, 0); shimmerCtx.lineTo(glowSize, 0); shimmerCtx.stroke();
+                    
+                    shimmerCtx.beginPath(); shimmerCtx.arc(0, 0, glowSize, 0, Math.PI * 2); shimmerCtx.fillStyle = gradient; shimmerCtx.fill();
+                    
+                    shimmerCtx.restore();
+                }
+            }
+        }
+        
+        // Shooting Star Class
+        class ShootingStar {
+            constructor() {
+                this.active = false; this.x = 0; this.y = 0; this.length = 100;
+                this.speed = 12; this.opacity = 0.9; this.angle = Math.PI / 4;
+                this.life = 0; this.maxLife = 100; this.trail = [];
+            }
+            spawn() {
+                const width = window.innerWidth; const height = window.innerHeight;
+                this.x = Math.random() * width * 0.9; this.y = Math.random() * height * 0.3;
+                this.length = Math.max(60, 80 + Math.random() * 120);
+                this.speed = Math.max(8, 10 + Math.random() * 14);
+                this.opacity = 0.7 + Math.random() * 0.3;
+                this.angle = Math.PI / 5 + Math.random() * 0.5;
+                this.active = true; this.life = 0;
+                this.maxLife = 50 + Math.random() * 60; this.trail = [];
+            }
+            update() {
+                if (!this.active) return;
+                const speedX = Math.cos(this.angle) * this.speed;
+                const speedY = Math.sin(this.angle) * this.speed;
+                this.trail.unshift({ x: this.x, y: this.y, opacity: 1 });
+                if (this.trail.length > 15) this.trail.pop();
+                this.x += speedX; this.y += speedY; this.life++;
+                const width = window.innerWidth; const height = window.innerHeight;
+                if (this.x > width + 150 || this.y > height + 150 || this.life > this.maxLife) this.active = false;
+            }
+            draw(ctx) {
+                if (!this.active) return;
+                const fadeOut = Math.max(0, 1 - (this.life / this.maxLife));
+                const currentOpacity = this.opacity * fadeOut;
+                
+                for (let i = 0; i < this.trail.length; i++) {
+                    const t = this.trail[i];
+                    const trailOpacity = currentOpacity * (1 - i / this.trail.length) * 0.5;
+                    const trailRadius = Math.max(0.5, 2 - i * 0.1);
+                    ctx.beginPath(); ctx.arc(t.x, t.y, trailRadius, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255, 255, 255, ' + trailOpacity + ')'; ctx.fill();
+                }
+                
+                const tailX = this.x - Math.cos(this.angle) * this.length;
+                const tailY = this.y - Math.sin(this.angle) * this.length;
+                const gradient = ctx.createLinearGradient(tailX, tailY, this.x, this.y);
+                gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+                gradient.addColorStop(0.3, 'rgba(255, 250, 230, ' + (currentOpacity * 0.3) + ')');
+                gradient.addColorStop(0.7, 'rgba(255, 255, 255, ' + (currentOpacity * 0.7) + ')');
+                gradient.addColorStop(1, 'rgba(255, 255, 255, ' + currentOpacity + ')');
+                ctx.beginPath(); ctx.moveTo(tailX, tailY); ctx.lineTo(this.x, this.y);
+                ctx.strokeStyle = gradient; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.stroke();
+                
+                const headGlow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 6);
+                headGlow.addColorStop(0, 'rgba(255, 255, 255, ' + currentOpacity + ')');
+                headGlow.addColorStop(0.5, 'rgba(255, 250, 220, ' + (currentOpacity * 0.5) + ')');
+                headGlow.addColorStop(1, 'rgba(255, 245, 200, 0)');
+                ctx.beginPath(); ctx.arc(this.x, this.y, 6, 0, Math.PI * 2); ctx.fillStyle = headGlow; ctx.fill();
+            }
+        }
+        
+        function initShootingStars() {
+            shootingStars = [];
+            for (let i = 0; i < 6; i++) shootingStars.push(new ShootingStar());
+        }
+        
+        function manageShootingStars() {
+            if (Math.random() < 0.008) {
+                for (let i = 0; i < shootingStars.length; i++) {
+                    if (!shootingStars[i].active) { shootingStars[i].spawn(); break; }
+                }
+            }
+        }
+        
+        // Animation Loop
+        function animate() {
+            const time = Date.now() * 0.001;
+            drawStars(time);
+            drawShimmerStars(time);
+            const width = window.innerWidth; const height = window.innerHeight;
+            shootingCtx.clearRect(0, 0, width, height);
+            manageShootingStars();
+            for (let i = 0; i < shootingStars.length; i++) { shootingStars[i].update(); shootingStars[i].draw(shootingCtx); }
+            animationFrameId = requestAnimationFrame(animate);
+        }
+        
+        // Navigation Handler
+        document.getElementById('backBtn').addEventListener('click', function() {
+            window.location.href = 'main.html';
+        });
+        
+        // Auto-stop other video when one plays
+        const topVideo = document.getElementById('topVideo');
+        const leftVideo = document.getElementById('leftVideo');
+        
+        topVideo.addEventListener('play', function() {
+            leftVideo.pause();
+        });
+        
+        leftVideo.addEventListener('play', function() {
+            topVideo.pause();
+        });
+        
+        // Resize & Visibility Handlers
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(resizeCanvas, 150);
+        });
+        
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden && animationFrameId) {
+                cancelAnimationFrame(animationFrameId); animationFrameId = null;
+            } else if (!document.hidden && !animationFrameId) animate();
+        });
+        
+        // Initialize
+        resizeCanvas();
+        initShootingStars();
+        animate();
+    </script>
+</body>
+</html>

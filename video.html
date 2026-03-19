@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Eid Mubarak</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-deep: #05080f;
+            --bg-mid: #0a1025;
+            --bg-upper: #0f1633;
+            --moon-core: #fffce8;
+            --moon-light: #f7ecc6;
+            --moon-mid: #e8d9a8;
+            --moon-dark: #c4b078;
+            --moon-glow: #ffe4a0;
+            --accent-gold: #e8c547;
+            --accent-warm: #d4a853;
+            --card-bg: rgba(12, 18, 38, 0.92);
+            --border: rgba(232, 197, 71, 0.12);
+            --safe-area-top: env(safe-area-inset-top, 0px);
+            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-deep);
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            color: #e8e8e8;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .night-sky {
+            position: fixed;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse at 80% 10%, rgba(30, 40, 80, 0.3) 0%, transparent 50%),
+                radial-gradient(ellipse at 20% 80%, rgba(20, 30, 60, 0.2) 0%, transparent 40%),
+                radial-gradient(ellipse at 50% 50%, rgba(15, 22, 51, 0.8) 0%, transparent 70%),
+                linear-gradient(180deg, 
+                    #020408 0%,
+                    #050a14 10%,
+                    #0a1025 30%,
+                    #0d1530 50%,
+                    #0a0f20 70%,
+                    #050810 100%
+                );
+            z-index: -10;
+        }
+
+        .milky-way {
+            position: fixed;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse 120% 40% at 30% 30%, rgba(100, 120, 180, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse 100% 30% at 70% 60%, rgba(80, 100, 150, 0.02) 0%, transparent 40%);
+            z-index: -9;
+            animation: milkyDrift 120s linear infinite;
+        }
+
+        @keyframes milkyDrift {
+            0% { transform: translateX(0) translateY(0); }
+            50% { transform: translateX(-5%) translateY(2%); }
+            100% { transform: translateX(0) translateY(0); }
+        }
+
+        #starsCanvas, #shootingCanvas, #shimmerCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #starsCanvas { z-index: -8; }
+        #shootingCanvas { z-index: -7; pointer-events: none; }
+        #shimmerCanvas { z-index: -6; pointer-events: none; }
+
+        .moon-container {
+            position: fixed;
+            z-index: -5;
+            filter: drop-shadow(0 0 40px rgba(255, 228, 160, 0.4));
+        }
+
+        .moon {
+            border-radius: 50%;
+            position: relative;
+            background: radial-gradient(circle at 38% 38%, 
+                var(--moon-core) 0%,
+                var(--moon-light) 25%,
+                var(--moon-mid) 55%,
+                var(--moon-dark) 85%,
+                #a89060 100%
+            );
+            box-shadow: 
+                0 0 80px 30px rgba(255, 228, 160, 0.25),
+                0 0 160px 60px rgba(255, 228, 160, 0.12),
+                0 0 240px 100px rgba(255, 228, 160, 0.06),
+                inset -25px -20px 50px rgba(100, 80, 40, 0.5),
+                inset 10px 10px 30px rgba(255, 255, 240, 0.2);
+            animation: moonGlow 6s ease-in-out infinite, moonFloat 20s ease-in-out infinite;
+        }
+
+        .moon::before, .moon::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 40%, 
+                rgba(160, 140, 100, 0.4) 0%,
+                rgba(140, 120, 80, 0.3) 50%,
+                transparent 70%
+            );
+            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .moon::before {
+            width: 25%; height: 25%;
+            top: 20%; left: 25%;
+            box-shadow: 
+                inset 2px 2px 5px rgba(0, 0, 0, 0.3),
+                90px 30px 0 15px rgba(160, 140, 100, 0.25),
+                40px 70px 0 8px rgba(160, 140, 100, 0.2),
+                100px 85px 0 20px rgba(160, 140, 100, 0.18),
+                -10px 90px 0 12px rgba(160, 140, 100, 0.22),
+                70px 110px 0 6px rgba(160, 140, 100, 0.15),
+                130px 50px 0 10px rgba(160, 140, 100, 0.2);
+        }
+
+        .moon::after {
+            width: 15%; height: 15%;
+            top: 55%; left: 15%;
+            box-shadow: 
+                inset 1px 1px 3px rgba(0, 0, 0, 0.25),
+                120px -20px 0 8px rgba(160, 140, 100, 0.2),
+                60px 20px 0 5px rgba(160, 140, 100, 0.18);
+        }
+
+        .moon-craters {
+            position: absolute; inset: 0;
+            border-radius: 50%; overflow: hidden;
+        }
+        .moon-craters::before {
+            content: ''; position: absolute; width: 100%; height: 100%;
+            background: 
+                radial-gradient(circle at 65% 35%, rgba(120, 100, 60, 0.15) 0%, transparent 8%),
+                radial-gradient(circle at 45% 65%, rgba(130, 110, 70, 0.12) 0%, transparent 6%),
+                radial-gradient(circle at 75% 55%, rgba(125, 105, 65, 0.1) 0%, transparent 5%),
+                radial-gradient(circle at 30% 40%, rgba(135, 115, 75, 0.08) 0%, transparent 4%),
+                radial-gradient(circle at 55% 25%, rgba(140, 120, 80, 0.1) 0%, transparent 3%);
+        }
+
+        @keyframes moonGlow {
+            0%, 100% { box-shadow: 0 0 80px 30px rgba(255, 228, 160, 0.25), 0 0 160px 60px rgba(255, 228, 160, 0.12), 0 0 240px 100px rgba(255, 228, 160, 0.06), inset -25px -20px 50px rgba(100, 80, 40, 0.5), inset 10px 10px 30px rgba(255, 255, 240, 0.2); }
+            50% { box-shadow: 0 0 100px 40px rgba(255, 228, 160, 0.35), 0 0 180px 80px rgba(255, 228, 160, 0.18), 0 0 280px 120px rgba(255, 228, 160, 0.08), inset -25px -20px 50px rgba(100, 80, 40, 0.5), inset 10px 10px 30px rgba(255, 255, 240, 0.2); }
+        }
+        @keyframes moonFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(1deg); }
+        }
+
+        .clouds-container {
+            position: fixed; inset: 0; z-index: -4; overflow: hidden;
+            perspective: 1500px; transform-style: preserve-3d;
+        }
+        .cloud-layer { position: absolute; inset: 0; transform-style: preserve-3d; }
+        .cloud {
+            position: absolute; filter: blur(2px); opacity: 0;
+            animation: cloudFadeIn 2s ease-out forwards;
+        }
+        @keyframes cloudFadeIn { to { opacity: 1; } }
+        .cloud-puff {
+            position: absolute;
+            background: radial-gradient(ellipse at center, rgba(180, 190, 210, 0.5) 0%, rgba(140, 150, 170, 0.25) 40%, transparent 70%);
+            border-radius: 50%;
+        }
+        .cloud-shadow {
+            position: absolute;
+            background: radial-gradient(ellipse at center, rgba(5, 8, 20, 0.3) 0%, transparent 60%);
+            border-radius: 50%; filter: blur(8px);
+        }
+        .cloud-1 { animation: cloudMove1 45s linear infinite; }
+        .cloud-2 { animation: cloudMove2 55s linear infinite; }
+        .cloud-3 { animation: cloudMove3 65s linear infinite; }
+        .cloud-4 { animation: cloudMove4 50s linear infinite; }
+        .cloud-5 { animation: cloudMove5 70s linear infinite; }
+        .cloud-6 { animation: cloudMove6 60s linear infinite; }
+        .cloud-7 { animation: cloudMove1 80s linear infinite; }
+        .cloud-8 { animation: cloudMove2 75s linear infinite; }
+
+        @keyframes cloudMove1 { 0% { transform: translateX(-200px) translateZ(20px) scale(1.6); } 100% { transform: translateX(calc(100vw + 250px)) translateZ(20px) scale(1.6); } }
+        @keyframes cloudMove2 { 0% { transform: translateX(calc(100vw + 150px)) translateZ(60px) scale(1.4); } 100% { transform: translateX(-200px) translateZ(60px) scale(1.4); } }
+        @keyframes cloudMove3 { 0% { transform: translateX(-250px) translateZ(100px) scale(1.2); } 100% { transform: translateX(calc(100vw + 300px)) translateZ(100px) scale(1.2); } }
+        @keyframes cloudMove4 { 0% { transform: translateX(calc(100vw + 200px)) translateZ(40px) scale(1.8); } 100% { transform: translateX(-250px) translateZ(40px) scale(1.8); } }
+        @keyframes cloudMove5 { 0% { transform: translateX(-180px) translateZ(80px) scale(1.3); } 100% { transform: translateX(calc(100vw + 220px)) translateZ(80px) scale(1.3); } }
+        @keyframes cloudMove6 { 0% { transform: translateX(calc(100vw + 180px)) translateZ(30px) scale(1.5); } 100% { transform: translateX(-220px) translateZ(30px) scale(1.5); } }
+
+        .main-container {
+            min-height: 100vh; min-height: 100dvh;
+            display: flex; flex-direction: column;
+            align-items: center;
+            padding: 16px;
+            padding-top: max(110px, var(--safe-area-top));
+            padding-bottom: max(20px, var(--safe-area-bottom));
+            position: relative; z-index: 1;
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            padding: 12px 16px;
+            padding-top: max(12px, var(--safe-area-top));
+            background: linear-gradient(180deg, rgba(5, 8, 15, 0.98) 0%, rgba(5, 8, 15, 0.9) 70%, transparent 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(232, 197, 71, 0.1);
+            border: 1px solid rgba(232, 197, 71, 0.2);
+            border-radius: 10px;
+            padding: 8px 14px;
+            color: var(--accent-gold);
+            font-size: 0.85rem;
+            font-weight: 500;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            height: fit-content;
+        }
+
+        .back-btn:hover {
+            background: rgba(232, 197, 71, 0.15);
+            border-color: var(--accent-gold);
+        }
+
+        .back-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .nav-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+        }
+
+        .nav-icons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .nav-icon-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            background: rgba(232, 197, 71, 0.08);
+            border: 1px solid rgba(232, 197, 71, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-icon-btn:hover {
+            background: rgba(232, 197, 71, 0.18);
+            border-color: var(--accent-gold);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(232, 197, 71, 0.15);
+        }
+
+        .nav-icon-btn svg {
+            width: 22px;
+            height: 22px;
+            color: var(--accent-gold);
+        }
+
+        .nav-label {
+            font-size: 0.7rem;
+            color: #a8b0be;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-item:hover .nav-label {
+            color: var(--accent-gold);
+        }
+
+        .click-here-text {
+            font-size: 0.75rem;
+            color: var(--accent-gold);
+            font-weight: 600;
+            text-align: center;
+            animation: pulseText 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseText {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        /* Card */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--border);
+            border-radius: clamp(18px, 5vw, 28px);
+            padding: clamp(22px, 5vw, 40px);
+            max-width: 520px; width: 100%;
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6), 0 0 100px 30px rgba(232, 197, 71, 0.03), 0 0 1px rgba(255, 255, 255, 0.1) inset;
+            animation: cardFloat 7s ease-in-out infinite;
+            position: relative; overflow: hidden;
+            margin-top: 10px;
+        }
+        .card::before {
+            content: ''; position: absolute; top: -100%; left: -100%; width: 300%; height: 300%;
+            background: radial-gradient(circle at 20% 20%, rgba(232, 197, 71, 0.04) 0%, transparent 30%), radial-gradient(circle at 80% 80%, rgba(212, 168, 83, 0.03) 0%, transparent 25%);
+            pointer-events: none; animation: cardShine 15s linear infinite;
+        }
+        @keyframes cardShine { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-6px) rotate(0.3deg); }
+            75% { transform: translateY(-10px) rotate(-0.3deg); }
+        }
+
+        .card-content { position: relative; z-index: 1; text-align: center; }
+        
+        /* Eid Header */
+        .eid-header {
+            text-align: center;
+            margin-bottom: clamp(20px, 5vw, 30px);
+        }
+
+        .eid-moon-icon {
+            width: clamp(60px, 15vw, 80px);
+            height: clamp(60px, 15vw, 80px);
+            margin: 0 auto clamp(16px, 4vw, 24px);
+            background: linear-gradient(145deg, rgba(232, 197, 71, 0.2) 0%, rgba(212, 168, 83, 0.1) 100%);
+            border-radius: 50%;
+            border: 1px solid rgba(232, 197, 71, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: eidPulse 3s ease-in-out infinite;
+        }
+
+        .eid-moon-icon svg {
+            width: clamp(32px, 8vw, 42px);
+            height: clamp(32px, 8vw, 42px);
+            color: var(--accent-gold);
+        }
+
+        @keyframes eidPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(232, 197, 71, 0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 0 25px 8px rgba(232, 197, 71, 0.15); }
+        }
+
+        .eid-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.8rem, 7vw, 2.5rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-warm) 50%, #f0d060 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+
+        .eid-subtitle {
+            font-size: clamp(0.9rem, 3vw, 1rem);
+            color: #8892a5;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(232, 197, 71, 0.25) 20%, rgba(232, 197, 71, 0.4) 50%, rgba(232, 197, 71, 0.25) 80%, transparent 100%);
+            margin: clamp(18px, 4vw, 26px) 0;
+        }
+
+        .card-message {
+            font-size: clamp(0.82rem, 2.8vw, 0.95rem);
+            line-height: 1.75;
+            color: #b8c0cc;
+            text-align: left;
+        }
+
+        .card-message p {
+            margin-bottom: clamp(10px, 2.5vw, 18px);
+        }
+
+        .card-message .highlight {
+            color: var(--accent-gold);
+            font-weight: 500;
+        }
+
+        .card-message .emoji {
+            font-size: 1.1em;
+        }
+
+        .star-decoration {
+            position: absolute;
+            color: var(--accent-gold);
+            opacity: 0.15;
+            font-size: 1.5rem;
+        }
+        .star-1 { top: 10%; left: 5%; animation: twinkleStar 3s ease-in-out infinite; }
+        .star-2 { top: 12%; right: 8%; animation: twinkleStar 4s ease-in-out infinite 0.5s; }
+        .star-3 { bottom: 18%; left: 8%; animation: twinkleStar 3.5s ease-in-out infinite 1s; }
+        .star-4 { bottom: 10%; right: 5%; animation: twinkleStar 4.5s ease-in-out infinite 1.5s; }
+
+        @keyframes twinkleStar {
+            0%, 100% { opacity: 0.15; transform: scale(1); }
+            50% { opacity: 0.35; transform: scale(1.2); }
+        }
+
+        /* Responsive */
+        @media (max-width: 360px) {
+            .main-container { padding: 12px; padding-top: 100px; }
+            .card { padding: 18px; }
+            .nav-bar { padding: 10px 12px; }
+            .back-btn { padding: 6px 10px; font-size: 0.8rem; }
+            .nav-icon-btn { width: 40px; height: 40px; }
+            .nav-icon-btn svg { width: 18px; height: 18px; }
+            .nav-label { font-size: 0.6rem; }
+            .nav-icons { gap: 8px; }
+            .moon-container { top: 14%; right: 2%; }
+            .moon { width: 50px; height: 50px; }
+        }
+        @media (min-width: 361px) and (max-width: 390px) {
+            .moon-container { top: 12%; right: 3%; }
+            .moon { width: 60px; height: 60px; }
+        }
+        @media (min-width: 391px) and (max-width: 430px) {
+            .moon-container { top: 10%; right: 4%; }
+            .moon { width: 70px; height: 70px; }
+        }
+        @media (min-width: 431px) and (max-width: 500px) {
+            .moon-container { top: 10%; right: 5%; }
+            .moon { width: 80px; height: 80px; }
+        }
+        @media (min-width: 501px) and (max-width: 768px) {
+            .moon-container { top: 8%; right: 6%; }
+            .moon { width: 90px; height: 90px; }
+        }
+        @media (min-width: 769px) {
+            .moon-container { top: 8%; right: 8%; }
+            .moon { width: 100px; height: 100px; }
+        }
+        @media (min-width: 1024px) {
+            .moon { width: 120px; height: 120px; }
+        }
+        @media (max-height: 500px) and (orientation: landscape) {
+            .main-container { padding: 10px; padding-top: 70px; }
+            .card { padding: 16px 20px; animation: none; }
+            .moon-container { top: 5%; }
+            .moon { width: 45px; height: 45px; }
+            .eid-moon-icon { width: 45px; height: 45px; margin-bottom: 10px; }
+            .eid-moon-icon svg { width: 22px; height: 22px; }
+            .nav-icon-btn { width: 36px; height: 36px; }
+            .nav-label { display: none; }
+        }
+        @supports (padding-top: env(safe-area-inset-top)) {
+            .main-container {
+                padding-top: max(110px, env(safe-area-inset-top));
+            }
+            .nav-bar {
+                padding-top: max(12px, env(safe-area-inset-top));
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        .back-btn:focus-visible, .nav-icon-btn:focus-visible {
+            outline: 2px solid var(--accent-gold);
+            outline-offset: 2px;
+        }
+        
+        /* Videos Section */
+        .videos-section {
+            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .video-item {
+            background: rgba(15, 22, 51, 0.6);
+            border-radius: 12px;
+            padding: 10px;
+            border: 1px solid rgba(232, 197, 71, 0.1);
+        }
+        
+        .video-item video {
+            width: 100%;
+            border-radius: 8px;
+            display: block;
+        }
+        
+        .video-hearts {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-top: 8px;
+            animation: heartBeat 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="night-sky"></div>
+    <div class="milky-way"></div>
+    <canvas id="starsCanvas"></canvas>
+    <canvas id="shootingCanvas"></canvas>
+    <canvas id="shimmerCanvas"></canvas>
+    
+    <div class="moon-container">
+        <div class="moon"><div class="moon-craters"></div></div>
+    </div>
+    
+    <div class="clouds-container">
+        <div class="cloud-layer">
+            <div class="cloud cloud-1" style="top: 8%; opacity: 0.12;">
+                <div class="cloud-shadow" style="width: 180px; height: 50px; left: 10px; top: 35px;"></div>
+                <div class="cloud-puff" style="width: 140px; height: 70px; left: 0; top: 10px;"></div>
+                <div class="cloud-puff" style="width: 100px; height: 90px; left: 50px; top: 0;"></div>
+                <div class="cloud-puff" style="width: 120px; height: 60px; left: 120px; top: 20px;"></div>
+                <div class="cloud-puff" style="width: 80px; height: 70px; left: 180px; top: 5px;"></div>
+            </div>
+            <div class="cloud cloud-2" style="top: 22%; opacity: 0.1;">
+                <div class="cloud-shadow" style="width: 160px; height: 45px; left: 8px; top: 32px;"></div>
+                <div class="cloud-puff" style="width: 120px; height: 60px; left: 0; top: 8px;"></div>
+                <div class="cloud-puff" style="width: 85px; height: 75px; left: 40px; top: 0;"></div>
+                <div class="cloud-puff" style="width: 110px; height: 55px; left: 100px; top: 15px;"></div>
+            </div>
+            <div class="cloud cloud-3" style="top: 38%; opacity: 0.14;">
+                <div class="cloud-shadow" style="width: 220px; height: 60px; left: 12px; top: 42px;"></div>
+                <div class="cloud-puff" style="width: 170px; height: 85px; left: 0; top: 5px;"></div>
+                <div class="cloud-puff" style="width: 120px; height: 110px; left: 60px; top: 0;"></div>
+                <div class="cloud-puff" style="width: 140px; height: 70px; left: 160px; top: 15px;"></div>
+                <div class="cloud-puff" style="width: 90px; height: 80px; left: 250px; top: 8px;"></div>
+            </div>
+            <div class="cloud cloud-4" style="top: 55%; opacity: 0.11;">
+                <div class="cloud-shadow" style="width: 200px; height: 55px; left: 10px; top: 38px;"></div>
+                <div class="cloud-puff" style="width: 150px; height: 75px; left: 0; top: 12px;"></div>
+                <div class="cloud-puff" style="width: 110px; height: 95px; left: 70px; top: 0;"></div>
+                <div class="cloud-puff" style="width: 130px; height: 65px; left: 150px; top: 18px;"></div>
+            </div>
+            <div class="cloud cloud-5" style="top: 70%; opacity: 0.13;">
+                <div class="cloud-shadow" style="width: 240px; height: 65px; left: 14px; top: 45px;"></div>
+                <div class="cloud-puff" style="width: 180px; height: 90px; left: 0; top: 8px;"></div>
+                <div class="cloud-puff" style="width: 130px; height: 120px; left: 80px; top: 0;"></div>
+                <div class="cloud-puff" style="width: 150px; height: 75px; left: 180px; top: 12px;"></div>
+                <div class="cloud-puff" style="width: 100px; height: 85px; left: 290px; top: 5px;"></div>
+            </div>
+            <div class="cloud cloud-6" style="top: 15%; opacity: 0.09;">
+                <div class="cloud-shadow" style="width: 170px; height: 48px; left: 9px; top: 34px;"></div>
+                <div class="cloud-puff" style="width: 130px; height: 65px; left: 0; top: 10px;"></div>
+                <div class="cloud-puff" style="width: 90px; height: 80px; left: 45px; top: 0;"></div>
+                <div class="cloud-puff" style="width: 115px; height: 58px; left: 110px; top: 16px;"></div>
+            </div>
+            <div class="cloud cloud-7" style="top: 85%; opacity: 0.1;">
+                <div class="cloud-shadow" style="width: 190px; height: 52px; left: 11px; top: 36px;"></div>
+                <div class="cloud-puff" style="width: 145px; height: 72px; left: 0; top: 9px;"></div>
+                <div class="cloud-puff" style="width: 100px; height: 88px; left: 55px; top: 0;"></div>
+                <div class="cloud-puff" style="width: 125px; height: 62px; left: 130px; top: 14px;"></div>
+            </div>
+            <div class="cloud cloud-8" style="top: 45%; opacity: 0.08;">
+                <div class="cloud-shadow" style="width: 150px; height: 42px; left: 7px; top: 30px;"></div>
+                <div class="cloud-puff" style="width: 110px; height: 55px; left: 0; top: 6px;"></div>
+                <div class="cloud-puff" style="width: 75px; height: 70px; left: 35px; top: 0;"></div>
+                <div class="cloud-puff" style="width: 95px; height: 50px; left: 85px; top: 12px;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Navigation Bar -->
+    <nav class="nav-bar">
+        <button class="back-btn" id="backBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            Back
+        </button>
+        <div class="nav-right">
+            <div class="nav-icons">
+                <div class="nav-item">
+                    <button class="nav-icon-btn" id="videoBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                        </svg>
+                    </button>
+                    <span class="nav-label">Video</span>
+                </div>
+                <div class="nav-item">
+                    <button class="nav-icon-btn" id="birthdayBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <path d="M12 3v4"></path>
+                            <path d="M8 3c0 2 4 2 4 0s-4-2-4 0z"></path>
+                            <rect x="6" y="11" width="12" height="4" rx="1"></rect>
+                        </svg>
+                    </button>
+                    <span class="nav-label">Cake</span>
+                </div>
+                <div class="nav-item">
+                    <button class="nav-icon-btn" id="letterBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                    </button>
+                    <span class="nav-label">Letter</span>
+                </div>
+                <div class="nav-item">
+                    <button class="nav-icon-btn" id="messageBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </button>
+                    <span class="nav-label">Message</span>
+                </div>
+            </div>
+            <span class="click-here-text">Click Here</span>
+        </div>
+    </nav>
+    
+    <div class="main-container">
+        <div class="card">
+            <span class="star-decoration star-1">✦</span>
+            <span class="star-decoration star-2">✧</span>
+            <span class="star-decoration star-3">✦</span>
+            <span class="star-decoration star-4">✧</span>
+            
+            <div class="card-content">
+                <div class="eid-header">
+                    <div class="eid-moon-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </div>
+                </div>
+                
+                <div class="divider"></div>
+                
+                <!-- Videos Section -->
+                <div class="videos-section">
+                    <div class="video-item">
+                        <video controls preload="metadata" playsinline>
+                            <source src="WhatsApp Video 2026-03-17 at 8.51.15 PM.mp4" type="video/mp4">
+                        </video>
+                        <div class="video-hearts"> 💖💕💗</div>
+                    </div>
+                    <div class="video-item">
+                        <video controls preload="metadata" playsinline>
+                            <source src="WhatsApp Video 2026-03-17 at 8.51.16 PM (1).mp4" type="video/mp4">
+                        </video>
+                        <div class="video-hearts"> (1) 💖💕💗</div>
+                    </div>
+                    <div class="video-item">
+                        <video controls preload="metadata" playsinline>
+                            <source src="WhatsApp Video 2026-03-17 at 8.51.16 PM.mp4" type="video/mp4">
+                        </video>
+                        <div class="video-hearts"> 💖💕💗</div>
+                    </div>
+                    <div class="video-item">
+                        <video controls preload="metadata" playsinline>
+                            <source src="WhatsApp Video 2026-03-17 at 8.51.17 PM (1).mp4" type="video/mp4">
+                        </video>
+                        <div class="video-hearts"> 💖💕💗</div>
+                    </div>
+                    <div class="video-item">
+                        <video controls preload="metadata" playsinline>
+                            <source src="WhatsApp Video 2026-03-17 at 8.51.17 PM.mp4" type="video/mp4">
+                        </video>
+                        <div class="video-hearts"> 💖💕💗</div>
+                    </div>
+                    <div class="video-item">
+                        <video controls preload="metadata" playsinline>
+                            <source src="WhatsApp Video 2026-03-17 at 8.51.18 PM (1).mp4" type="video/mp4">
+                        </video>
+                        <div class="video-hearts"> 💖💕💗</div>
+                    </div>
+                    <div class="video-item">
+                        <video controls preload="metadata" playsinline>
+                            <source src="WhatsApp Video 2026-03-17 at 8.51.18 PM.mp4" type="video/mp4">
+                        </video>
+                        <div class="video-hearts"> 💖💕💗</div>
+                    </div>
+                    <div class="video-item">
+                        <video controls preload="metadata" playsinline>
+                            <source src="WhatsApp Video 2026-03-17 at 11.47.41 PM.mp4" type="video/mp4">
+                        </video>
+                        <div class="video-hearts"> 💖💕💗</div>
+                    </div>
+                    <div class="video-item">
+                        <video controls preload="metadata" playsinline>
+                            <source src="WhatsApp Video 2026-03-17 at 11.47.42 PM.mp4" type="video/mp4">
+                        </video>
+                        <div class="video-hearts"> 💖💕💗</div>
+                    </div>
+                    <div class="video-item">
+                        <video controls preload="metadata" playsinline>
+                            <source src="WhatsApp Video 2026-03-19 at 2.04.46 PM (1).mp4" type="video/mp4">
+                        </video>
+                        <div class="video-hearts"> 💖💕💗</div>
+                    </div>
+                    <div class="video-item">
+                        <video controls preload="metadata" playsinline>
+                            <source src="WhatsApp Video 2026-03-19 at 2.04.46 PM.mp4" type="video/mp4">
+                        </video>
+                        <div class="video-hearts"> 💖💕💗</div>
+                    </div>
+                    <div class="video-item">
+                        <video controls preload="metadata" playsinline>
+                            <source src="WhatsApp Video 2026-03-19 at 2.04.47 PM (1).mp4" type="video/mp4">
+                        </video>
+                        <div class="video-hearts"> 💖💕💗</div>
+                    </div>
+                    <div class="video-item">
+                        <video controls preload="metadata" playsinline>
+                            <source src="WhatsApp Video 2026-03-19 at 2.04.47 PM (2).mp4" type="video/mp4">
+                        </video>
+                        <div class="video-hearts"> 💖💕💗</div>
+                    </div>
+                    <div class="video-item">
+                        <video controls preload="metadata" playsinline>
+                            <source src="WhatsApp Video 2026-03-19 at 2.04.47 PM.mp4" type="video/mp4">
+                        </video>
+                        <div class="video-hearts"> 💖💕💗</div>
+                    </div>
+                    <div class="video-item">
+                        <video controls preload="metadata" playsinline>
+                            <source src="WhatsApp Video 2026-03-19 at 2.04.50 PM.mp4" type="video/mp4">
+                        </video>
+                        <div class="video-hearts"> 💖💕💗</div>
+                    </div>
+                </div>
+                
+                <div class="card-message">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Canvas & Context
+        const starsCanvas = document.getElementById('starsCanvas');
+        const shootingCanvas = document.getElementById('shootingCanvas');
+        const shimmerCanvas = document.getElementById('shimmerCanvas');
+        const starsCtx = starsCanvas.getContext('2d');
+        const shootingCtx = shootingCanvas.getContext('2d');
+        const shimmerCtx = shimmerCanvas.getContext('2d');
+        
+        let animationFrameId = null;
+        let stars = [];
+        let shootingStars = [];
+        let shimmerStars = [];
+        
+        function resizeCanvas() {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            [starsCanvas, shootingCanvas, shimmerCanvas].forEach(canvas => {
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
+            });
+            
+            starsCtx.scale(dpr, dpr);
+            shootingCtx.scale(dpr, dpr);
+            shimmerCtx.scale(dpr, dpr);
+            
+            initStars();
+            initShimmerStars();
+        }
+        
+        function initStars() {
+            stars = [];
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const numStars = Math.min(Math.max(Math.floor((width * height) / 1800), 150), 600);
+            
+            for (let i = 0; i < numStars; i++) {
+                const brightness = Math.random();
+                const colorRand = Math.random();
+                let color;
+                
+                if (colorRand < 0.6) color = { r: 255, g: 255, b: 255 };
+                else if (colorRand < 0.75) color = { r: 200, g: 220, b: 255 };
+                else if (colorRand < 0.9) color = { r: 255, g: 240, b: 200 };
+                else color = { r: 255, g: 200, b: 180 };
+                
+                stars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    radius: Math.max(0.3, brightness < 0.1 ? 0.4 : brightness < 0.3 ? 0.8 : brightness < 0.6 ? 1.2 : brightness < 0.85 ? 1.6 : 2.2),
+                    baseOpacity: 0.4 + brightness * 0.6,
+                    twinkleSpeed: 0.008 + Math.random() * 0.025,
+                    twinklePhase: Math.random() * Math.PI * 2,
+                    color: color,
+                    isBright: brightness > 0.85
+                });
+            }
+        }
+        
+        function drawStars(time) {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            starsCtx.clearRect(0, 0, width, height);
+            
+            for (let i = 0; i < stars.length; i++) {
+                const star = stars[i];
+                const twinkle = Math.sin(time * star.twinkleSpeed + star.twinklePhase);
+                const opacity = Math.max(0.15, Math.min(1, star.baseOpacity + twinkle * 0.35));
+                const radius = Math.max(0.3, star.radius);
+                
+                if (star.isBright) {
+                    const glowRadius = Math.max(1, radius * 4);
+                    const glow = starsCtx.createRadialGradient(star.x, star.y, 0, star.x, star.y, glowRadius);
+                    glow.addColorStop(0, 'rgba(' + star.color.r + ',' + star.color.g + ',' + star.color.b + ',' + (opacity * 0.4) + ')');
+                    glow.addColorStop(0.5, 'rgba(' + star.color.r + ',' + star.color.g + ',' + star.color.b + ',' + (opacity * 0.1) + ')');
+                    glow.addColorStop(1, 'rgba(' + star.color.r + ',' + star.color.g + ',' + star.color.b + ',0)');
+                    starsCtx.beginPath();
+                    starsCtx.arc(star.x, star.y, glowRadius, 0, Math.PI * 2);
+                    starsCtx.fillStyle = glow;
+                    starsCtx.fill();
+                }
+                
+                const gradient = starsCtx.createRadialGradient(star.x, star.y, 0, star.x, star.y, Math.max(0.5, radius * 1.8));
+                gradient.addColorStop(0, 'rgba(' + star.color.r + ',' + star.color.g + ',' + star.color.b + ',' + opacity + ')');
+                gradient.addColorStop(0.4, 'rgba(' + star.color.r + ',' + star.color.g + ',' + star.color.b + ',' + (opacity * 0.6) + ')');
+                gradient.addColorStop(1, 'rgba(' + star.color.r + ',' + star.color.g + ',' + star.color.b + ',0)');
+                starsCtx.beginPath();
+                starsCtx.arc(star.x, star.y, Math.max(0.5, radius * 1.8), 0, Math.PI * 2);
+                starsCtx.fillStyle = gradient;
+                starsCtx.fill();
+            }
+        }
+        
+        function initShimmerStars() {
+            shimmerStars = [];
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const numShimmer = Math.floor(Math.random() * 8) + 12;
+            
+            for (let i = 0; i < numShimmer; i++) {
+                shimmerStars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    radius: 1.5 + Math.random() * 2,
+                    phase: Math.random() * Math.PI * 2,
+                    speed: 0.02 + Math.random() * 0.04
+                });
+            }
+        }
+        
+        function drawShimmerStars(time) {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            shimmerCtx.clearRect(0, 0, width, height);
+            
+            for (let i = 0; i < shimmerStars.length; i++) {
+                const s = shimmerStars[i];
+                const shimmer = Math.sin(time * s.speed + s.phase);
+                const opacity = Math.max(0, (shimmer + 1) * 0.5);
+                
+                if (opacity > 0.7) {
+                    const radius = Math.max(1, s.radius);
+                    const glowSize = radius * 6;
+                    
+                    shimmerCtx.save();
+                    shimmerCtx.translate(s.x, s.y);
+                    shimmerCtx.rotate(time * 0.001);
+                    
+                    const gradient = shimmerCtx.createRadialGradient(0, 0, 0, 0, 0, glowSize);
+                    gradient.addColorStop(0, 'rgba(255, 255, 255, ' + opacity + ')');
+                    gradient.addColorStop(0.2, 'rgba(255, 250, 220, ' + (opacity * 0.6) + ')');
+                    gradient.addColorStop(0.5, 'rgba(255, 245, 200, ' + (opacity * 0.2) + ')');
+                    gradient.addColorStop(1, 'rgba(255, 240, 180, 0)');
+                    
+                    shimmerCtx.beginPath(); shimmerCtx.moveTo(0, -glowSize); shimmerCtx.lineTo(0, glowSize);
+                    shimmerCtx.strokeStyle = 'rgba(255, 255, 255, ' + (opacity * 0.4) + ')'; shimmerCtx.lineWidth = 1; shimmerCtx.stroke();
+                    
+                    shimmerCtx.beginPath(); shimmerCtx.moveTo(-glowSize, 0); shimmerCtx.lineTo(glowSize, 0); shimmerCtx.stroke();
+                    
+                    shimmerCtx.beginPath(); shimmerCtx.arc(0, 0, glowSize, 0, Math.PI * 2); shimmerCtx.fillStyle = gradient; shimmerCtx.fill();
+                    
+                    shimmerCtx.restore();
+                }
+            }
+        }
+        
+        // Shooting Star Class
+        class ShootingStar {
+            constructor() {
+                this.active = false; this.x = 0; this.y = 0; this.length = 100;
+                this.speed = 12; this.opacity = 0.9; this.angle = Math.PI / 4;
+                this.life = 0; this.maxLife = 100; this.trail = [];
+            }
+            spawn() {
+                const width = window.innerWidth; const height = window.innerHeight;
+                this.x = Math.random() * width * 0.9; this.y = Math.random() * height * 0.3;
+                this.length = Math.max(60, 80 + Math.random() * 120);
+                this.speed = Math.max(8, 10 + Math.random() * 14);
+                this.opacity = 0.7 + Math.random() * 0.3;
+                this.angle = Math.PI / 5 + Math.random() * 0.5;
+                this.active = true; this.life = 0;
+                this.maxLife = 50 + Math.random() * 60; this.trail = [];
+            }
+            update() {
+                if (!this.active) return;
+                const speedX = Math.cos(this.angle) * this.speed;
+                const speedY = Math.sin(this.angle) * this.speed;
+                this.trail.unshift({ x: this.x, y: this.y, opacity: 1 });
+                if (this.trail.length > 15) this.trail.pop();
+                this.x += speedX; this.y += speedY; this.life++;
+                const width = window.innerWidth; const height = window.innerHeight;
+                if (this.x > width + 150 || this.y > height + 150 || this.life > this.maxLife) this.active = false;
+            }
+            draw(ctx) {
+                if (!this.active) return;
+                const fadeOut = Math.max(0, 1 - (this.life / this.maxLife));
+                const currentOpacity = this.opacity * fadeOut;
+                
+                for (let i = 0; i < this.trail.length; i++) {
+                    const t = this.trail[i];
+                    const trailOpacity = currentOpacity * (1 - i / this.trail.length) * 0.5;
+                    const trailRadius = Math.max(0.5, 2 - i * 0.1);
+                    ctx.beginPath(); ctx.arc(t.x, t.y, trailRadius, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255, 255, 255, ' + trailOpacity + ')'; ctx.fill();
+                }
+                
+                const tailX = this.x - Math.cos(this.angle) * this.length;
+                const tailY = this.y - Math.sin(this.angle) * this.length;
+                const gradient = ctx.createLinearGradient(tailX, tailY, this.x, this.y);
+                gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+                gradient.addColorStop(0.3, 'rgba(255, 250, 230, ' + (currentOpacity * 0.3) + ')');
+                gradient.addColorStop(0.7, 'rgba(255, 255, 255, ' + (currentOpacity * 0.7) + ')');
+                gradient.addColorStop(1, 'rgba(255, 255, 255, ' + currentOpacity + ')');
+                ctx.beginPath(); ctx.moveTo(tailX, tailY); ctx.lineTo(this.x, this.y);
+                ctx.strokeStyle = gradient; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.stroke();
+                
+                const headGlow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 6);
+                headGlow.addColorStop(0, 'rgba(255, 255, 255, ' + currentOpacity + ')');
+                headGlow.addColorStop(0.5, 'rgba(255, 250, 220, ' + (currentOpacity * 0.5) + ')');
+                headGlow.addColorStop(1, 'rgba(255, 245, 200, 0)');
+                ctx.beginPath(); ctx.arc(this.x, this.y, 6, 0, Math.PI * 2); ctx.fillStyle = headGlow; ctx.fill();
+            }
+        }
+        
+        function initShootingStars() {
+            shootingStars = [];
+            for (let i = 0; i < 6; i++) shootingStars.push(new ShootingStar());
+        }
+        
+        function manageShootingStars() {
+            if (Math.random() < 0.008) {
+                for (let i = 0; i < shootingStars.length; i++) {
+                    if (!shootingStars[i].active) { shootingStars[i].spawn(); break; }
+                }
+            }
+        }
+        
+        // Animation Loop
+        function animate() {
+            const time = Date.now() * 0.001;
+            drawStars(time);
+            drawShimmerStars(time);
+            const width = window.innerWidth; const height = window.innerHeight;
+            shootingCtx.clearRect(0, 0, width, height);
+            manageShootingStars();
+            for (let i = 0; i < shootingStars.length; i++) { shootingStars[i].update(); shootingStars[i].draw(shootingCtx); }
+            animationFrameId = requestAnimationFrame(animate);
+        }
+        
+        // Navigation Handlers
+        document.getElementById('backBtn').addEventListener('click', function() {
+            window.location.href = 'main.html';
+        });
+        
+        document.getElementById('videoBtn').addEventListener('click', function() {
+            window.location.href = 'video.html';
+        });
+        
+        document.getElementById('birthdayBtn').addEventListener('click', function() {
+            window.location.href = 'birthday.html';
+        });
+        
+        document.getElementById('letterBtn').addEventListener('click', function() {
+            window.location.href = 'letter.html';
+        });
+        
+        document.getElementById('messageBtn').addEventListener('click', function() {
+            window.location.href = 'message.html';
+        });
+        
+        // Resize & Visibility Handlers
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(resizeCanvas, 150);
+        });
+        
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden && animationFrameId) {
+                cancelAnimationFrame(animationFrameId); animationFrameId = null;
+            } else if (!document.hidden && !animationFrameId) animate();
+        });
+        
+        // Video auto-stop: when one video plays, others stop
+        document.querySelectorAll('video').forEach(video => {
+            video.addEventListener('play', function() {
+                document.querySelectorAll('video').forEach(v => {
+                    if (v !== video) {
+                        v.pause();
+                        v.currentTime = 0;
+                    }
+                });
+            });
+        });
+        
+        // Initialize
+        resizeCanvas();
+        initShootingStars();
+        animate();
+    </script>
+</body>
+</html>

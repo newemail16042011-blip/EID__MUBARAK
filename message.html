@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>A Message For You</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-deep: #05080f;
+            --bg-mid: #0a1025;
+            --moon-core: #fffce8;
+            --moon-light: #f7ecc6;
+            --accent-gold: #e8c547;
+            --accent-rose: #fb7185;
+            --accent-pink: #f472b6;
+            --card-bg: rgba(12, 18, 38, 0.92);
+            --border: rgba(232, 197, 71, 0.12);
+            --safe-area-top: env(safe-area-inset-top, 0px);
+            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-deep);
+            min-height: 100vh;
+            min-height: 100dvh; /* Dynamic viewport height for iOS */
+            overflow-x: hidden;
+            overflow-y: auto;
+            color: #e8e8e8;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Background Effects */
+        .night-sky {
+            position: fixed;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse at 80% 10%, rgba(30, 40, 80, 0.3) 0%, transparent 50%),
+                radial-gradient(ellipse at 20% 80%, rgba(20, 30, 60, 0.2) 0%, transparent 40%),
+                linear-gradient(180deg, #020408 0%, #050a14 10%, #0a1025 30%, #0d1530 50%, #0a0f20 70%, #050810 100%);
+            z-index: -10;
+        }
+
+        .milky-way {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse 120% 40% at 30% 30%, rgba(100, 120, 180, 0.03) 0%, transparent 50%);
+            z-index: -9;
+            animation: milkyDrift 120s linear infinite;
+        }
+
+        @keyframes milkyDrift {
+            0% { transform: translateX(0) translateY(0); }
+            50% { transform: translateX(-5%) translateY(2%); }
+            100% { transform: translateX(0) translateY(0); }
+        }
+
+        /* Canvases */
+        #starsCanvas, #shootingCanvas, #shimmerCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        #starsCanvas { z-index: -8; }
+        #shootingCanvas { z-index: -7; }
+        #shimmerCanvas { z-index: -6; }
+
+        /* Moon */
+        .moon-container {
+            position: fixed;
+            z-index: -5;
+            filter: drop-shadow(0 0 40px rgba(255, 228, 160, 0.4));
+            top: max(10%, var(--safe-area-top));
+            right: 5%;
+        }
+
+        .moon {
+            border-radius: 50%;
+            position: relative;
+            background: radial-gradient(circle at 38% 38%, var(--moon-core) 0%, var(--moon-light) 25%, #e8d9a8 55%, #c4b078 85%, #a89060 100%);
+            box-shadow: 0 0 80px 30px rgba(255, 228, 160, 0.25), 0 0 160px 60px rgba(255, 228, 160, 0.12);
+            animation: moonGlow 6s ease-in-out infinite, moonFloat 20s ease-in-out infinite;
+        }
+
+        @keyframes moonGlow {
+            0%, 100% { box-shadow: 0 0 80px 30px rgba(255, 228, 160, 0.25), 0 0 160px 60px rgba(255, 228, 160, 0.12); }
+            50% { box-shadow: 0 0 100px 40px rgba(255, 228, 160, 0.35), 0 0 180px 80px rgba(255, 228, 160, 0.18); }
+        }
+        @keyframes moonFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(1deg); }
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            padding-top: max(12px, var(--safe-area-top));
+            background: linear-gradient(180deg, rgba(5, 8, 15, 0.98) 0%, transparent 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(232, 197, 71, 0.1);
+            border: 1px solid rgba(232, 197, 71, 0.2);
+            border-radius: 10px;
+            padding: 8px 14px;
+            color: var(--accent-gold);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        /* Main Container */
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px;
+            padding-top: max(80px, calc(var(--safe-area-top) + 60px));
+            padding-bottom: max(30px, var(--safe-area-bottom)); /* Initial bottom padding */
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px 20px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            animation: cardFloat 7s ease-in-out infinite;
+        }
+
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        .card-content { position: relative; z-index: 1; text-align: center; }
+
+        .heart-icon {
+            width: 70px; height: 70px;
+            margin: 0 auto 16px;
+            background: linear-gradient(145deg, rgba(251, 113, 133, 0.15) 0%, rgba(244, 114, 182, 0.08) 100%);
+            border-radius: 50%;
+            border: 1px solid rgba(251, 113, 133, 0.2);
+            display: flex; align-items: center; justify-content: center;
+            animation: heartPulse 3s ease-in-out infinite;
+        }
+
+        .heart-icon svg { width: 35px; height: 35px; color: var(--accent-rose); }
+
+        @keyframes heartPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.3rem, 5vw, 1.8rem);
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent-rose) 0%, var(--accent-pink) 50%, var(--accent-gold) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(251, 113, 133, 0.4), transparent);
+            margin: 16px 0;
+        }
+
+        .card-message {
+            font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+            line-height: 1.7;
+            color: #b8c0cc;
+            text-align: left;
+        }
+
+        .card-message p { margin-bottom: 12px; }
+
+        .highlight { color: var(--accent-gold); font-weight: 500; }
+        .highlight-rose { color: var(--accent-rose); font-weight: 500; }
+
+        .quote-box {
+            background: rgba(251, 113, 133, 0.08);
+            border-left: 3px solid var(--accent-rose);
+            padding: 12px 14px;
+            margin: 14px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        .quote-box p { font-style: italic; color: #c8cfd8; margin-bottom: 0 !important; font-size: 0.9em; }
+
+        .closing-message {
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--accent-rose);
+            margin-top: 14px;
+            font-weight: 500;
+        }
+
+        /* Video Section - At The Bottom */
+        .video-section {
+            width: 100%;
+            max-width: 500px;
+            margin-top: 24px;
+            margin-bottom: max(24px, var(--safe-area-bottom)); /* Safe area for iPhone home bar */
+        }
+
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(232, 197, 71, 0.2);
+            background: #000;
+        }
+
+        .video-wrapper video {
+            width: 100%;
+            height: auto;
+            display: block;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+        }
+
+        .video-caption {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 0.8rem;
+            color: var(--accent-gold);
+            font-style: italic;
+            opacity: 0.9;
+            padding: 0 8px;
+        }
+
+        /* Star Decorations */
+        .star-decoration {
+            position: absolute;
+            color: var(--accent-gold);
+            opacity: 0.15;
+            font-size: 1.2rem;
+        }
+        .star-1 { top: 8%; left: 5%; }
+        .star-2 { top: 12%; right: 8%; }
+        .star-3 { bottom: 18%; left: 8%; }
+        .star-4 { bottom: 8%; right: 5%; }
+
+        /* iPhone Specific Responsive Adjustments */
+        
+        /* Small iPhones (SE, 12 Mini, 13 Mini) */
+        @media (max-width: 375px) {
+            .main-container { padding: 12px; padding-top: max(70px, calc(var(--safe-area-top) + 55px)); }
+            .card { padding: 18px 16px; }
+            .nav-bar { padding: 10px 12px; }
+            .page-title { font-size: 1rem; }
+            .moon-container { top: calc(var(--safe-area-top) + 10px); right: 3%; }
+            .moon { width: 50px; height: 50px; }
+        }
+
+        /* Standard iPhones (12, 13, 14, 15) */
+        @media (min-width: 376px) and (max-width: 430px) {
+            .moon { width: 65px; height: 65px; }
+        }
+
+        /* Large iPhones (Plus, Pro Max) */
+        @media (min-width: 431px) {
+            .moon { width: 80px; height: 80px; }
+            .card { padding: 30px; }
+        }
+
+        /* Landscape Orientation */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .main-container { padding-top: max(60px, calc(var(--safe-area-top) + 50px)); }
+            .card { animation: none; margin-top: 10px; }
+            .video-section { margin-top: 16px; }
+            .moon { width: 40px; height: 40px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="night-sky"></div>
+    <div class="milky-way"></div>
+    <canvas id="starsCanvas"></canvas>
+    <canvas id="shootingCanvas"></canvas>
+    <canvas id="shimmerCanvas"></canvas>
+    
+    <div class="moon-container">
+        <div class="moon"></div>
+    </div>
+    
+    <!-- Navigation Bar -->
+    <nav class="nav-bar">
+        <button class="back-btn" id="backBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            Back
+        </button>
+        <span class="page-title">Message</span>
+        <div style="width: 60px;"></div>
+    </nav>
+    
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Message Card -->
+        <div class="card">
+            <span class="star-decoration star-1">&#10022;</span>
+            <span class="star-decoration star-2">&#10023;</span>
+            <span class="star-decoration star-3">&#10022;</span>
+            <span class="star-decoration star-4">&#10023;</span>
+            
+            <div class="card-content">
+                <div class="heart-icon">
+                    <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                </div>
+                
+                <h1 class="card-title">A Message For You</h1>
+                <div class="divider"></div>
+                
+                <div class="card-message">
+                    <p>Zainab, I know I've already said a lot in the previous message. But there's something more I need to tell you from the bottom of my heart...</p>
+                    
+                    <p>Last time when you messaged me on TikTok and asked me to delete your photos, and even said, <span class="highlight-rose">"Who knows with guys like you, they could do anything"</span>... just remember one thing.</p>
+                    
+                    <p>If I were truly like those guys, you would be crying today and I would be laughing at you.</p>
+                    
+                    <p>But you know me very well... I have always respected you, and I still do. I know you belong to someone else now, and I respect that fact. It just hurt me that the person I give so much respect to could say something like that about me. I am <span class="highlight">not one of those people</span> who play with someone's honor or memories.</p>
+                    
+                    <div class="quote-box">
+                        <p>"I know that you belong to someone else now, and I truly respect that fact... The truth is, I just can't move on. I tried twice, but I failed. I swear to God, I am never going to try to move on again in my life. I hope you stay happy with whoever you are with."</p>
+                    </div>
+                    
+                    <p>And you really think I was in a relationship with you just because I wanted <span class="highlight">Spanish papers?</span> You're being silly. If that's what I wanted, I would have gone to Aliza. She was already asking me to marry her. If papers were my goal, I could have married her and gotten them easily.</p>
+                    
+                    <p>Anyway... I am your lover, and <span class="highlight">Nusrat Fateh Ali Khan</span> said something very beautiful about lovers:</p>
+                    
+                    <div class="quote-box">
+                        <p>"True lovers never bring shame upon their beloved."</p>
+                    </div>
+                </div>
+                
+                <p class="closing-message">With love and respect, always yours &#129153;</p>
+            </div>
+        </div>
+
+        <!-- Video Section - Bottom -->
+        <div class="video-section">
+            <div class="video-wrapper">
+                <video id="mainVideo" controls preload="metadata" playsinline webkit-playsinline>
+                    <source src="True lovers never bring shame upon their beloved..mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            <p class="video-caption">"True lovers never bring shame upon their beloved..." Zainab</p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize variables
+        let stars = [];
+        let shootingStars = [];
+        let shimmerStars = [];
+        
+        const starsCanvas = document.getElementById('starsCanvas');
+        const shootingCanvas = document.getElementById('shootingCanvas');
+        const shimmerCanvas = document.getElementById('shimmerCanvas');
+        const starsCtx = starsCanvas.getContext('2d');
+        const shootingCtx = shootingCanvas.getContext('2d');
+        const shimmerCtx = shimmerCanvas.getContext('2d');
+        
+        function resizeCanvas() {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            [starsCanvas, shootingCanvas, shimmerCanvas].forEach(canvas => {
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
+            });
+            
+            starsCtx.setTransform(1, 0, 0, 1, 0, 0);
+            shootingCtx.setTransform(1, 0, 0, 1, 0, 0);
+            shimmerCtx.setTransform(1, 0, 0, 1, 0, 0);
+            
+            starsCtx.scale(dpr, dpr);
+            shootingCtx.scale(dpr, dpr);
+            shimmerCtx.scale(dpr, dpr);
+            
+            initStars();
+        }
+        
+        function initStars() {
+            stars = [];
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const numStars = Math.min(Math.floor((width * height) / 2500), 200);
+            
+            for (let i = 0; i < numStars; i++) {
+                stars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    radius: Math.max(0.3, Math.random() * 1.8),
+                    baseOpacity: 0.4 + Math.random() * 0.6,
+                    twinkleSpeed: 0.008 + Math.random() * 0.025,
+                    twinklePhase: Math.random() * Math.PI * 2,
+                    color: { r: 255, g: 255, b: 255 }
+                });
+            }
+        }
+        
+        function drawStars(time) {
+            starsCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+            stars.forEach(star => {
+                const twinkle = Math.sin(time * star.twinkleSpeed + star.twinklePhase);
+                const opacity = Math.max(0.1, star.baseOpacity + twinkle * 0.3);
+                
+                starsCtx.beginPath();
+                starsCtx.arc(star.x, star.y, Math.max(0.5, star.radius * 1.5), 0, Math.PI * 2);
+                starsCtx.fillStyle = 'rgba(255,255,255,' + opacity + ')';
+                starsCtx.fill();
+            });
+        }
+        
+        function animate() {
+            const time = Date.now() * 0.001;
+            drawStars(time);
+            requestAnimationFrame(animate);
+        }
+        
+        // Nav handler
+        document.getElementById('backBtn').addEventListener('click', () => window.location.href = 'main.html');
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        animate();
+    </script>
+</body>
+</html>
